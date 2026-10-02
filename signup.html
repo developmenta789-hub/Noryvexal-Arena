@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#F5F6FA"><meta name="color-scheme" content="light"><link rel="icon" href="assets/favicon.png"><link rel="preload" href="assets/fonts/Poppins-Regular.ttf" as="font" type="font/ttf" crossorigin><link rel="preload" href="assets/fonts/Poppins-Medium.ttf" as="font" type="font/ttf" crossorigin><link rel="preload" href="assets/fonts/Poppins-Bold.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="css/style.css"><title>Sign up | Noryvexal Arena</title></head>
+<body><div class="bg" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i><i class="grid"></i></div>
+<div class="page">
+<main class="stage"><aside class="aside"><div class="brand"><img class="logo" src="assets/logo.png" alt="" width="96" height="96"></div>
+  <p class="eyebrow" data-brand="product">Noryvexal Arena</p>
+  <h2>Join the <span class="grad">arena.</span></h2>
+  <p class="lead">Free Fire tournaments, all in one place.</p></aside>
+<section class="card" aria-labelledby="t">
+  <div class="brand"><img class="logo" src="assets/logo.png" alt="Noryvexal logo" width="84" height="84"></div>
+  <p class="eyebrow" data-brand="product">Noryvexal Arena</p>
+  <h1 id="t">Create your <span class="grad">account</span></h1>
+  <p class="sub">Confirm your age first, then continue with Google.</p>
+
+  <div class="steps" aria-hidden="true"><span class="s on">Your age</span><span class="line"></span><span class="s">Sign up</span></div>
+
+  <fieldset class="ages">
+    <legend class="sr">Your age</legend>
+    <label class="age"><input type="radio" name="age" value="adult"><span class="box"><strong>18+</strong><em>I'm 18 or older</em></span></label>
+    <label class="age"><input type="radio" name="age" value="minor"><span class="box"><strong>Under 18</strong><em>I'm younger than 18</em></span></label>
+  </fieldset>
+
+  <div id="blocked" class="msg show error" role="alert" hidden>Sorry, Noryvexal Arena is only for players aged 18 and over. We can't create an account for anyone under 18, and we don't save any data.</div>
+
+  <div id="form" hidden>
+    <label class="check"><input type="checkbox" id="terms"><span>I confirm that I am 18 or older and I agree to the <a href="terms.html" target="_blank" rel="noopener">Terms</a> and <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> of <span data-brand="company">NST</span>.</span></label>
+    <button id="google" class="btn google" type="button" disabled><svg class="gi" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg><span>Sign up with Google</span><b class="spinner"></b></button>
+  </div>
+  <div id="msg" class="msg" role="alert" aria-live="polite"></div>
+
+  <div class="hint">
+    <p class="divider">Already a player?</p>
+    <a class="btn ghost" href="login.html">Log in</a>
+  </div>
+  <p class="legal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>We only use your Google name, email and photo.</span></p>
+</section></main>
+<footer class="powered"><span data-brand="powered">Powered by NST</span></footer>
+</div>
+<noscript><p class="banner">Please enable JavaScript to use Noryvexal Arena.</p></noscript>
+<script type="module" src="js/signup.js"></script></body></html>

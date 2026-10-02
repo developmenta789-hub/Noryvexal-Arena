@@ -1,0 +1,198 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#F5F6FA"><meta name="color-scheme" content="light"><link rel="icon" href="assets/favicon.png"><link rel="preload" href="assets/fonts/Poppins-Regular.ttf" as="font" type="font/ttf" crossorigin><link rel="preload" href="assets/fonts/Poppins-Medium.ttf" as="font" type="font/ttf" crossorigin><link rel="preload" href="assets/fonts/Poppins-Bold.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="css/style.css"><title>Home | Noryvexal Arena</title>
+</head>
+<body><div class="bg" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i><i class="grid"></i></div>
+<section id="blocked" class="blocked" hidden>
+  <div class="dbox doc"><h2 id="blocked-title">Account blocked</h2><p id="blocked-text"></p><button id="blocked-out" class="btn" type="button">Log out</button></div>
+</section>
+<div id="app" class="shell" hidden>
+  <header class="topbar">
+    <img class="mini" src="assets/logo.png" alt="" width="34" height="34">
+    <strong data-brand="product">Noryvexal Arena</strong>
+    <span class="grow"></span>
+    <a href="#/notifications" class="bell" aria-label="Notifications"><img src="assets/notification.png" alt="" width="22" height="22"><i id="bell-dot" class="bdot" hidden></i></a>
+    <a href="#/profile" class="coins" aria-label="Your coins"><img src="assets/rupee_coin.png" alt="" width="20" height="20"><strong id="coins">0</strong></a>
+    <a href="#/profile" aria-label="Open your profile"><img id="avatar" class="avatar" alt="" hidden width="36" height="36"></a>
+  </header>
+  <main id="content" class="content">
+
+    <section id="v-home" class="view" data-view="home">
+      <h1 class="hello">Hi, <span id="uname">player</span></h1>
+      <p class="sub">Pick a game mode and join a match.</p>
+      <a id="sponsor" class="sponsor" hidden target="_blank" rel="noopener sponsored"><img alt="Sponsored banner"><span>Sponsored</span></a>
+      <section id="updates" aria-label="Latest updates" hidden>
+        <h2 class="sec">Latest updates</h2>
+        <div id="ulist" class="ulist"></div>
+      </section>
+      <h2 class="sec">Game modes</h2>
+      <div id="cats" class="cats"></div>
+      <div id="ad-home" class="adslot" hidden></div>
+      <div class="sechead"><h2 class="sec">Top players</h2><a href="#/board" class="more">See all</a></div>
+      <ol id="lb-mini" class="lb"></ol>
+    </section>
+
+    <section id="v-matches" class="view" data-view="matches" hidden>
+      <div class="back"><a href="#/" class="btn ghost sm">Back</a><h1 id="m-title">Matches</h1></div>
+      <div class="tabs" role="tablist" aria-label="Match status">
+        <button class="tab on" role="tab" aria-selected="true" data-tab="ongoing" type="button">Ongoing</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="upcoming" type="button">Upcoming</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="completed" type="button">Completed</button>
+        <button id="refresh" class="btn ghost sm" type="button"><span>Refresh</span></button>
+      </div>
+      <div id="tlist" class="tlist" aria-live="polite"></div>
+      <div id="tempty" class="panel" hidden><h2 id="tempty-title">No matches here</h2><p id="tempty-text"></p></div>
+      <div id="terr" class="msg" role="alert"></div>
+      <div id="ad-matches" class="adslot" hidden></div>
+    </section>
+
+    <section id="v-match" class="view" data-view="match" hidden>
+      <div class="back"><a id="d-back" href="#/" class="btn ghost sm">Back</a><h1>Match details</h1></div>
+      <div id="d-body"></div>
+      <div id="d-msg" class="msg" role="alert"></div>
+    </section>
+
+    <section id="v-my" class="view" data-view="my" hidden>
+      <div class="back"><h1>My matches</h1></div>
+      <div class="tabs" role="tablist" aria-label="My match status">
+        <button class="tab mtab on" role="tab" aria-selected="true" data-mtab="ongoing" type="button">Ongoing</button>
+        <button class="tab mtab" role="tab" aria-selected="false" data-mtab="upcoming" type="button">Upcoming</button>
+        <button class="tab mtab" role="tab" aria-selected="false" data-mtab="completed" type="button">Completed</button>
+      </div>
+      <div id="mlist" class="tlist" aria-live="polite"></div>
+      <div id="mempty" class="panel" hidden><h2 id="mempty-title">No matches here</h2><p>Matches you join will appear here.</p></div>
+      <div id="merr" class="msg" role="alert"></div>
+    </section>
+
+    <section id="v-coins" class="view" data-view="coins" hidden>
+      <div class="back"><h1>Coin history</h1></div>
+      <p class="tmeta">Your latest 100 coin changes. Deposits and withdrawals are done in the Payvex app.</p>
+      <div id="clist" class="ulist" aria-live="polite"></div>
+      <div id="cempty" class="panel" hidden><h2>No coin activity yet</h2><p>Deposits, entry fees, prizes and refunds will appear here.</p></div>
+      <div id="cerr" class="msg" role="alert"></div>
+    </section>
+
+    <section id="v-notif" class="view" data-view="notif" hidden>
+      <div class="back"><h1>Notifications</h1></div>
+      <div id="nlist" class="ulist" aria-live="polite"></div>
+      <div id="nempty" class="panel" hidden><h2>No notifications yet</h2><p>Match and event notices from the team will appear here.</p></div>
+      <div id="nerr" class="msg" role="alert"></div>
+    </section>
+
+    <section id="v-team" class="view" data-view="team" hidden>
+      <div class="back"><a href="#/profile" class="btn ghost sm">Back</a><h1>My team</h1></div>
+      <div id="team-body"></div>
+      <div id="team-msg" class="msg" role="alert"></div>
+    </section>
+
+    <section id="v-friends" class="view" data-view="friends" hidden>
+      <div class="back"><a href="#/profile" class="btn ghost sm">Back</a><h1>Friends</h1></div>
+      <div id="friends-body"></div>
+      <div id="friends-msg" class="msg" role="alert"></div>
+    </section>
+
+    <section id="v-support" class="view" data-view="support" hidden>
+      <div class="back"><a href="#/profile" class="btn ghost sm">Back</a><h1>Help and support</h1></div>
+      <div id="support-body"></div>
+      <div id="support-msg" class="msg" role="alert"></div>
+    </section>
+
+    <section id="v-about" class="view" data-view="about" hidden>
+      <div class="back"><a href="#/profile" class="btn ghost sm">Back</a><h1>About</h1></div>
+      <div class="dbox doc">
+        <h3 data-brand="product">Noryvexal Arena</h3>
+        <p>Noryvexal Arena is a Free Fire tournament platform where players join matches, follow results and climb the leaderboard.</p>
+        <p>It is a product of <strong data-brand="company">Noryvexal Software Team (NST)</strong>.</p>
+        <p>Noryvexal Arena is not affiliated with, endorsed by or sponsored by Garena or Free Fire.</p>
+        <p class="powered"><span data-brand="powered">Powered by NST</span></p>
+      </div>
+    </section>
+
+    <section id="v-terms" class="view" data-view="terms" hidden>
+      <div class="back"><a href="#/profile" class="btn ghost sm">Back</a><h1>Terms of use</h1></div>
+      <div class="dbox doc">
+        <p class="tmeta">Draft for review. Have a legal advisor check this text before you rely on it.</p>
+        <h3>1. Who can use it</h3>
+        <p>You must be 18 or older and sign in with your own Google account. One person, one account.</p>
+        <h3>2. Fair play</h3>
+        <p>No cheating, hacks, fake accounts or abuse of other players. Accounts that break these rules can be removed and their entries cancelled.</p>
+        <h3>3. Coins and entry</h3>
+        <p>Coins are used to join matches. Entry fees are shown on each match and are deducted when you join. Room details are shared only with players who joined.</p>
+        <h3>4. Results</h3>
+        <p>Match results and rankings are published by the organizers and are final unless a clear mistake is found.</p>
+        <h3>5. Changes</h3>
+        <p>Matches, prizes and these terms can change. Continuing to use the platform means you accept the current version.</p>
+        <h3>6. Contact</h3>
+        <p><span data-brand="company">NST</span> is the organizer. Contact details will be added here.</p>
+      </div>
+    </section>
+
+    <section id="v-privacy" class="view" data-view="privacy" hidden>
+      <div class="back"><a href="#/profile" class="btn ghost sm">Back</a><h1>Privacy policy</h1></div>
+      <div class="dbox doc">
+        <p class="tmeta">Draft for review. Have a legal advisor check this text before you rely on it.</p>
+        <h3>What we store</h3>
+        <p>From your Google account: name, email address and profile photo. From you: your 18+ confirmation, in-game name and Free Fire UID. From your activity: the matches you join and your coin balance.</p>
+        <h3>Why</h3>
+        <p>To sign you in, let you join matches, show your room details and results, and run rankings.</p>
+        <h3>Who can see it</h3>
+        <p>Your profile and wallet are readable only by you. Room details are readable only by players who joined that match. Rankings and results show names only.</p>
+        <h3>Where it is kept</h3>
+        <p>Your data is stored with Google Firebase (Authentication and Firestore).</p>
+        <h3>Your choices</h3>
+        <p>You can log out at any time. To ask for your data to be corrected or removed, contact <span data-brand="company">NST</span>. Contact details will be added here.</p>
+      </div>
+    </section>
+
+    <section id="v-board" class="view" data-view="board" hidden>
+      <div class="back"><h1>Leaderboard</h1></div>
+      <ol id="lb-full" class="lb"></ol>
+      <div id="lb-empty" class="panel" hidden><h2>No rankings yet</h2><p>Rankings appear after the first match results are published.</p></div>
+    </section>
+
+    <div id="ndlg" class="ndlg" hidden role="dialog" aria-modal="true" aria-labelledby="ndlg-title"><div class="ndlg-box"><h3 id="ndlg-title"></h3><p id="ndlg-msg" class="umsg"></p><p id="ndlg-when" class="twhen"></p><button id="ndlg-close" class="btn" type="button">Close</button></div></div>
+
+    <section id="v-profile" class="view" data-view="profile" hidden>
+      <div class="back"><h1>Profile</h1></div>
+      <div class="pcard">
+        <img id="p-photo" class="pphoto" alt="" width="84" height="84" hidden>
+        <h2 id="p-name">Player</h2>
+        <p id="p-email" class="tmeta"></p>
+        <p id="p-since" class="tmeta"></p>
+        <p class="tmeta">Your coins: <strong id="p-coins">0</strong></p>
+      </div>
+      <div class="dbox">
+        <h3>Game details</h3>
+        <p class="tmeta">Your Free Fire in-game name and UID. Room hosts use these to find you.</p>
+        <label class="flabel" for="g-name">In-game name</label>
+        <input id="g-name" class="finput" type="text" maxlength="30" autocomplete="off" placeholder="Your Free Fire name">
+        <label class="flabel" for="g-uid">Free Fire UID (numbers only)</label>
+        <input id="g-uid" class="finput" type="text" inputmode="numeric" maxlength="15" autocomplete="off" placeholder="e.g. 123456789">
+        <label class="flabel" for="g-mobile">Mobile number (optional, 10 digits)</label>
+        <input id="g-mobile" class="finput" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="e.g. 9876543210">
+        <p id="g-status" class="tmeta"></p>
+        <button id="g-save" class="btn" type="button"><span>Save</span></button>
+        <div id="g-msg" class="msg" role="alert"></div>
+      </div>
+      <div class="dbox links">
+        <a href="#/coins" class="lrow2">Coin history<span aria-hidden="true">&rsaquo;</span></a>
+        <a href="#/friends" class="lrow2">Friends<span aria-hidden="true">&rsaquo;</span></a>
+        <a href="#/team" class="lrow2">My team<span aria-hidden="true">&rsaquo;</span></a>
+        <a href="#/support" class="lrow2">Help and support<span aria-hidden="true">&rsaquo;</span></a>
+        <a href="#/about" id="share-app" class="lrow2">Share app<span aria-hidden="true">&rsaquo;</span></a>
+        <a href="#/about" class="lrow2">About<span aria-hidden="true">&rsaquo;</span></a>
+        <a href="#/terms" class="lrow2">Terms of use<span aria-hidden="true">&rsaquo;</span></a>
+        <a href="#/privacy" class="lrow2">Privacy policy<span aria-hidden="true">&rsaquo;</span></a>
+      </div>
+      <p class="powered"><span data-brand="powered">Powered by NST</span></p>
+      <button id="logout" class="btn ghost" type="button"><span>Log out</span></button>
+    </section>
+
+  </main>
+  <nav class="bottom" aria-label="Main">
+    <a href="#/" data-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span>Home</span></a>
+    <a href="#/my" data-nav="my"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg><span>My Matches</span></a>
+    <a href="#/board" data-nav="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 01-10 0zM7 6H4v1a3 3 0 003 3M17 6h3v1a3 3 0 01-3 3M12 14v4M8 21h8"/></svg><span>Leaderboard</span></a>
+    <a href="#/profile" data-nav="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><span>Profile</span></a>
+  </nav>
+</div>
+<noscript><p class="banner">Please enable JavaScript to use Noryvexal Arena.</p></noscript>
+<script type="module" src="js/home.js"></script></body></html>
