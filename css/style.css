@@ -171,9 +171,6 @@ h1{font-size:clamp(26px,7vw,32px);line-height:1.18;margin-bottom:10px}
 .mini{border-radius:10px}
 .avatar{border-radius:50%;border:1.5px solid var(--blue);object-fit:cover}
 .content{flex:1;width:100%;max-width:960px;margin:0 auto;padding:28px max(18px,env(safe-area-inset-left)) 20px}
-.hero{margin-bottom:22px}
-.hero h1{margin-bottom:6px;overflow-wrap:anywhere}
-.hero .sub{margin:0;max-width:46ch}
 .panel{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:40px 24px;border-radius:var(--r-lg);background:var(--surface);border:1px dashed var(--line)}
 .panel img{border-radius:18px;margin-bottom:10px;opacity:.95}
 .panel h2{font-size:18px}
@@ -205,18 +202,6 @@ h1{font-size:clamp(26px,7vw,32px);line-height:1.18;margin-bottom:10px}
 .sec{font-size:17px;margin:22px 0 12px}
 .sechead{display:flex;align-items:baseline;justify-content:space-between}
 .more{color:var(--cyan);font-size:14px;text-decoration:none}
-.sponsor{position:relative;display:block;margin-top:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--line);aspect-ratio:16/6;background:var(--surface)}
-.sponsor img{width:100%;height:100%;object-fit:cover;display:block}
-.sponsor span{position:absolute;top:8px;right:8px;font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(7,11,22,.7);color:var(--dim)}
-.cats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-@media(min-width:760px){.cats{grid-template-columns:repeat(4,1fr)}}
-.cat{--a:var(--blue);min-height:120px;display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:var(--r-md);text-decoration:none;text-align:left;border:1px solid color-mix(in srgb,var(--a) 45%,transparent);background:linear-gradient(155deg,color-mix(in srgb,var(--a) 26%,#0c1430),#0a1024 75%)}
-.cat:active{transform:scale(.98)}
-.cat:focus-visible,.bottom a:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
-.cat-ic{width:30px;height:30px;color:var(--a);display:block}.cat-ic svg{width:100%;height:100%}
-.cat-info{display:flex;flex-direction:column;line-height:1.25;flex:1}
-.cat-info strong{font-size:15px}.cat-info small{color:var(--dim);font-size:12px}
-.cat-foot{font-size:12px;color:var(--dim)}.cat-foot.hot{color:var(--ok);font-weight:500}
 .adslot{margin-top:18px;min-height:50px;border-radius:var(--r-sm);overflow:hidden}
 .back{display:flex;align-items:center;gap:12px;margin-bottom:14px}.back h1{font-size:22px}
 .lb{list-style:none;padding:0;display:grid;gap:8px}
@@ -314,8 +299,8 @@ h1,h2,h3,.coins,.lpts,.lrank,.tstat b,.tstat strong{font-family:var(--head);lett
 .btn.ghost{background:var(--surface-2);color:var(--text);border:1px solid var(--line)}
 .btn.danger{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.45);color:#FCA5A5}
 .btn.live{background:linear-gradient(135deg,#EF4444,#F97316);margin:10px 0;box-shadow:0 10px 24px -10px rgba(239,68,68,.8)}
-.btn:focus-visible,.age input:focus-visible+.box,.check input:focus-visible,.tab:focus-visible,#refresh:focus-visible,.cat:focus-visible,.bottom a:focus-visible,.coins:focus-visible,.bell:focus-visible,.tcard.go:focus-visible{outline-color:var(--cyan)}
-@media (hover:hover){.btn.ghost:hover{background:var(--blue-soft);border-color:var(--blue)}.age:hover .box{border-color:var(--blue)}.tcard:hover,.cat:hover{border-color:rgba(99,102,241,.55);transform:translateY(-2px)}}
+.btn:focus-visible,.age input:focus-visible+.box,.check input:focus-visible,.tab:focus-visible,#refresh:focus-visible,.ecard:focus-visible,.sp-slide:focus-visible,.sp-dot:focus-visible,.bottom a:focus-visible,.coins:focus-visible,.bell:focus-visible,.tcard.go:focus-visible{outline-color:var(--cyan)}
+@media (hover:hover){.btn.ghost:hover{background:var(--blue-soft);border-color:var(--blue)}.age:hover .box{border-color:var(--blue)}.tcard:hover,.ecard:hover{border-color:rgba(99,102,241,.55);transform:translateY(-2px)}}
 .spinner,.spinner.big{border-color:rgba(255,255,255,.12);border-top-color:var(--cyan)}
 
 /* inputs */
@@ -350,7 +335,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue);bo
 .tab.on{color:#fff;border-color:transparent;background:var(--grad)}
 
 /* cards */
-.tcard,.dbox,.ucard,.pcard,.lrow,.panel,.cat,.sponsor{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .2s var(--ease),border-color .2s}
+.tcard,.dbox,.ucard,.pcard,.lrow,.panel{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .2s var(--ease),border-color .2s}
 .panel{border:1px dashed rgba(99,102,241,.5);box-shadow:none}
 .tcard{border-radius:18px;overflow:hidden}
 .tstat{background:var(--surface-2)}
@@ -359,11 +344,8 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue);bo
 .pill.upcoming{color:#A5B4FC;border-color:rgba(99,102,241,.5);background:var(--blue-soft)}
 .twhen{color:var(--warn)}
 .ucard.pin{border-color:var(--blue);background:var(--blue-soft)}
-.sponsor span{background:rgba(7,10,18,.8);color:var(--dim)}
 .lrank.r1{color:var(--gold)}.lrank.r2{color:#CBD5E1}.lrank.r3{color:#FB923C}
 .lpts{color:#A5B4FC}
-.cat-ic{width:44px;height:44px;padding:9px;border-radius:12px;background:color-mix(in srgb,var(--a) 18%,var(--surface-2))}
-.cat-foot.hot{color:#4ADE80}
 .tcode{border-color:var(--blue);background:var(--blue-soft)}
 .check a,.tmeta a{color:#A5B4FC}
 
@@ -416,3 +398,105 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue);bo
 .rrow span:nth-child(2),.rrow strong,.rrow span:nth-child(3){text-align:right}
 .rrow.rhead{background:var(--blue-soft);color:#C7D2FE;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== section heading (home) ===== */
+.sec{font-family:var(--head);font-size:20px;letter-spacing:.02em;margin:22px 0 12px}
+
+
+/* =====================================================================
+   HOME SCREEN v2 (2026-10-05): Sponsor banner carousel > My Matches > Esports Matches.
+   Spacing rhythm: sections are 28px apart (32px on desktop); every card uses radius 18-20px, one shadow (--shadow),
+   and fixed aspect ratios so images never stretch and nothing jumps while loading.
+   Red dots/live colour: #EF4444 (same red as the live pill and Watch-live button).
+   ===================================================================== */
+:root{--sp-ms:600ms;--red:#EF4444;--sec-gap:28px}
+@media (min-width:900px){:root{--sec-gap:34px}}
+.content{padding-top:18px}
+@media (min-width:900px){.content{padding-top:28px}}
+.hsec{margin-top:var(--sec-gap)}
+.hsec-title{font-family:var(--head);font-size:clamp(22px,5.6vw,28px);font-weight:700;line-height:1.15;letter-spacing:.02em;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+.hsec-title::before{content:"";flex:none;width:4px;height:1.05em;border-radius:3px;background:var(--grad)}
+.sechead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sechead .hsec-title{margin-bottom:14px}
+
+/* ---------- 1. sponsor banner ---------- */
+.sp{margin:0}
+.sp-view{position:relative;overflow:hidden;border-radius:20px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow);aspect-ratio:16/7;max-height:360px;width:100%;touch-action:pan-y;user-select:none;-webkit-user-select:none;contain:layout paint}
+@media (min-width:760px){.sp-view{aspect-ratio:21/8}}
+.sp-track{display:flex;height:100%;width:100%;will-change:transform;transition:transform var(--sp-ms) var(--ease)}
+.sp-slide{position:relative;flex:0 0 100%;width:100%;height:100%;display:block;overflow:hidden;color:inherit;text-decoration:none;-webkit-user-drag:none}
+.sp-slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .35s ease;-webkit-user-drag:none;pointer-events:none}
+.sp-slide img.ok{opacity:1}
+.sp-slide::after{content:"";position:absolute;inset:auto 0 0 0;height:38%;background:linear-gradient(transparent,rgba(7,10,18,.5));pointer-events:none}
+.sp-tag{position:absolute;top:10px;right:10px;z-index:1;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(7,10,18,.72);color:#CBD5E1;border:1px solid rgba(255,255,255,.12)}
+.sp-slide.broken{background:linear-gradient(135deg,#1E1B4B,#10162A 70%)}
+.sp-slide.broken::after{display:none}
+.sp-fb{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:16px;text-align:center}
+.sp-fb b{font-family:var(--head);font-size:clamp(20px,5vw,28px);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sp-fb small{color:var(--dim);font-size:12px}
+a.sp-slide:focus-visible{outline:2px solid var(--cyan);outline-offset:-3px}
+/* loading skeleton (gradient slides across; transform only) */
+.sp-view.is-loading::before,.ecard.sk .ecard-art::before,.ecard.sk .ecard-foot::before,.mh-skel::before{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(100deg,transparent 20%,rgba(255,255,255,.06) 50%,transparent 80%);transform:translate3d(-100%,0,0);animation:shimmer 1.4s linear infinite;pointer-events:none}
+@keyframes shimmer{to{transform:translate3d(100%,0,0)}}
+.sp-dots{display:flex;align-items:center;justify-content:center;gap:2px;height:26px;margin-top:6px}
+.sp-dot{position:relative;width:20px;height:20px;padding:0;border:0;background:none;cursor:pointer;display:grid;place-items:center}
+.sp-dot::before{content:"";width:8px;height:8px;border-radius:999px;background:rgba(239,68,68,.35);transition:width .3s var(--ease),background-color .3s,box-shadow .3s}
+.sp-dot.on::before{width:24px;background:var(--red);box-shadow:0 0 10px rgba(239,68,68,.55)}
+.sp-dot:disabled{cursor:default}
+@media (hover:hover){.sp-dot:not(.on):not(:disabled):hover::before{background:rgba(239,68,68,.7)}}
+
+/* ---------- 2. My Matches ---------- */
+.mh-body{display:flex;flex-direction:column;gap:22px}
+.mg-head{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.mg-head h3{font-family:var(--head);font-size:19px;letter-spacing:.02em;line-height:1.2}
+.mg-dot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+.mgroup.ongoing .mg-dot{background:var(--ok);box-shadow:0 0 8px rgba(34,197,94,.6)}
+.mgroup.completed .mg-dot{background:#64748B}
+.mg-count{margin-left:auto;min-width:28px;text-align:center;padding:1px 10px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--dim);font-size:12px;font-weight:600}
+.mgrid{gap:14px}
+.mgrid .tcard{display:flex;flex-direction:column;height:100%}
+.mgrid .tcard .tstats{margin-top:auto}
+.mgrid .tcard .tmeta{margin:6px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mgrid .tcard .tstats{margin-top:12px}
+.mgrid .tcard>.tmeta+.tstats{margin-top:auto}
+.tcard .ttl h3{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.mgrid .tcard .tban{margin:-16px -16px 12px;height:auto;aspect-ratio:16/9}
+.mh-empty{display:flex;flex-direction:column;align-items:center;gap:2px;padding:20px 16px;border-radius:var(--r-md);border:1px dashed rgba(99,102,241,.4);background:var(--surface);text-align:center;color:var(--dim);font-size:13px}
+.mh-empty b{font-family:var(--head);font-size:17px;color:var(--text);letter-spacing:.02em}
+.mh-skel{position:relative;overflow:hidden;height:74px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line)}
+.mh-more{margin-top:12px}
+
+/* ---------- 3. Esports Matches (max 3 cards per row) ---------- */
+.egrid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media (min-width:520px){.egrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:760px){.egrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
+.ecard{--a:var(--blue);position:relative;display:flex;flex-direction:column;overflow:hidden;border-radius:20px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow);color:var(--text);text-decoration:none;text-align:left;transition:transform .2s var(--ease),border-color .2s,box-shadow .2s}
+.ecard:active{transform:scale(.985)}
+.ecard:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+@media (hover:hover){.ecard:hover{box-shadow:0 14px 30px -14px rgba(99,102,241,.55)}}
+.ecard-art{position:relative;display:grid;place-items:center;aspect-ratio:16/10;overflow:hidden;background:linear-gradient(135deg,color-mix(in srgb,var(--a) 55%,#0A0E1A),color-mix(in srgb,var(--a) 14%,#0A0E1A))}
+.ecard-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .35s ease}
+.ecard-art img.ok{opacity:1}
+.ecard-art::after{content:"";position:absolute;inset:auto 0 0 0;height:55%;background:linear-gradient(transparent,rgba(7,10,18,.88));pointer-events:none}
+.ecard-ic{position:relative;z-index:1;width:52px;height:52px;padding:12px;border-radius:16px;color:#fff;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28)}
+.ecard-ic svg{width:100%;height:100%;display:block}
+.ecard-ttl{position:absolute;left:14px;right:14px;bottom:10px;z-index:1;font-family:var(--head);font-size:clamp(20px,5vw,23px);font-weight:700;line-height:1.15;letter-spacing:.02em;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ecard-badge{position:absolute;top:10px;left:10px;z-index:1;font-size:11px;font-weight:600;line-height:1;padding:5px 10px;border-radius:999px;background:rgba(7,10,18,.78);color:#C7D2FE;border:1px solid rgba(99,102,241,.5)}
+.ecard-badge.hot{color:#FCA5A5;border-color:rgba(239,68,68,.6)}
+.ecard-foot{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;height:56px;padding:8px 14px;text-align:center;background:linear-gradient(135deg,color-mix(in srgb,var(--a) 26%,#10162A),#10162A);border-top:1px solid color-mix(in srgb,var(--a) 40%,transparent)}
+.ecard-ft{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;font-size:12.5px;font-weight:500;line-height:1.35;color:#E2E8F0}
+.ecard.sk{pointer-events:none}
+.ecard.sk .ecard-art,.ecard.sk .ecard-foot{background:var(--surface-2)}
+.ecard.sk .ecard-art::after{display:none}
+.homeempty{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:30px 20px;border-radius:20px;border:1px dashed rgba(99,102,241,.45);background:var(--surface);color:var(--dim);font-size:13px}
+.homeempty b{font-family:var(--head);font-size:20px;color:var(--text);letter-spacing:.02em}
+.homeempty.err{border-color:rgba(239,68,68,.45)}
+.homeempty .btn{margin-top:10px}
+@media (prefers-reduced-motion:reduce){.sp-view.is-loading::before,.ecard.sk .ecard-art::before,.ecard.sk .ecard-foot::before,.mh-skel::before{animation:none}}
+
+.bottom a:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+/* polish (2026-10-05): My Matches fits 3 cards per row on desktop; smaller image ratio on phones; headings clear the sticky top bar when scrolled to */
+.mgrid{grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr))}
+@media (max-width:519px){.ecard-art{aspect-ratio:16/9}}
+.hsec{scroll-margin-top:80px}

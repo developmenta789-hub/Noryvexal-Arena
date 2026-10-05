@@ -1,25 +1,22 @@
 import "./maintenance.js";
-import { ensureSession, firstAuthState, getProfile, isAllowed, logout, getTournaments, getCategories, getAppInfo, getBanners, getLeaderboard, getAnnouncements, getNotifications, getWallet, getWalletFull, getCoinHistory, saveGameProfile, getMyFriendCode, createFriendCode, addFriendByCode, getFriends, removeFriend, getMyTeam, createTeam, joinTeam, leaveTeam, disbandTeam, getMyRegistrations, getMyTickets, createTicket, isJoined, getRoom, getResult, getResultPlayers, getSlots, joinTournament, friendlyError } from "./firebase.js";
+import { ensureSession, firstAuthState, getProfile, isAllowed, logout, getTournaments, getCategories, getAppInfo, getBanners, getLeaderboard, getAnnouncements, getNotifications, getWallet, getWalletFull, getCoinHistory, saveGameProfile, getMyFriendCode, createFriendCode, addFriendByCode, getFriends, removeFriend, getMyTeam, createTeam, joinTeam, leaveTeam, disbandTeam, getMyRegistrations, getTournamentsByIds, getMyTickets, createTicket, isJoined, getRoom, getResult, getResultPlayers, getSlots, joinTournament, friendlyError } from "./firebase.js";
 import { $, initBrand, setMsg, mountAd } from "./ui.js";
-import { CATEGORIES } from "./config.js";
 import { useServer, server } from "./api.js";
+import { mountSponsor } from "./sponsor.js";
 
 initBrand();
 const $$ = (s) => [...document.querySelectorAll(s)];
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 let all = [], tab = "ongoing", catId = null, matchId = null, profile = null, authUser = null, coins = 0;
-let cats = CATEGORIES.slice();
+let cats = []; // game modes come ONLY from Admin (Firestore categories). Nothing is built in.
 const joinedIds = new Set();
-const loaded = { t: false, lb: false, my: false };
+const loaded = { t: false, lb: false, my: false, cats: false };
 let myIds = [], mtab = "ongoing";
+let tFailed = false, myFailed = false, catsErr = false, sponsor = null;
 
 /* ---------- helpers ---------- */
 const statusOf = (t) => (t.status === "live" || t.status === "ongoing" ? "ongoing" : t.status === "completed" || t.status === "cancelled" ? "completed" : "upcoming");
-const catOf = (t) => {
-  if (cats.some((c) => c.id === t.category)) return t.category;
-  const m = String(t.mode || "").toLowerCase();
-  return m.includes("clash") ? "clash-squad" : m.includes("lone") ? "lone-wolf" : "battle-royale";
-};
+const catOf = (t) => (cats.some((c) => c.id === t.category) ? t.category : null);
 const teamSizeOf = (t) => Number(t.teamSize) || 1;
 const teamLabel = (t) => { const n = teamSizeOf(t); return n === 1 ? "Solo" : n === 2 ? "Duo" : n === 4 ? "Squad" : n + " players"; };
 const entry = (n) => (Number(n) > 0 ? Number(n) + " coins" : "Free");
@@ -47,6 +44,7 @@ function route() {
   else if (h === "profile") v = "profile";
   $$(".view").forEach((s) => (s.hidden = s.dataset.view !== v));
   $$("[data-nav]").forEach((a) => { const on = a.dataset.nav === (v === "matches" || v === "match" ? "home" : ["about", "terms", "privacy", "team", "friends", "coins", "support"].includes(v) ? "profile" : v); a.classList.toggle("on", on); on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"); });
+  if (v === "home") renderMyHome();
   if (v === "matches") { $("#m-title").textContent = cats.find((c) => c.id === catId).name; renderMatches(); mountAd($("#ad-matches")); }
   if (v === "match") renderDetail();
   if (v === "board" && !loaded.lb) loadBoard();
@@ -60,22 +58,75 @@ function route() {
 }
 window.addEventListener("hashchange", route);
 
-/* ---------- game mode tiles ---------- */
+/* ---------- Esports Matches: one card per section made in Admin (Categories). Max 3 per row (CSS grid). ---------- */
+const PALETTE = ["#6366F1", "#22D3EE", "#F59E0B", "#EC4899", "#22C55E", "#8B5CF6"];
+const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>';
+const iconTile = () => { const ic = el("span", "ecard-ic"); ic.innerHTML = ICON; return ic; }; // static trusted SVG
 function renderCats() {
   const box = $("#cats");
-  box.replaceChildren(...cats.map((c) => {
+  $("#home-empty").hidden = !(loaded.cats && !catsErr && !cats.length);
+  $("#es-err").hidden = !(catsErr && !cats.length);
+  if (catsErr && !cats.length) { box.hidden = true; return; }
+  if (!loaded.cats) { // skeletons have the same size as real cards, so nothing jumps when data arrives
+    box.hidden = false;
+    box.replaceChildren(...[0, 1, 2].map(() => { const k = el("div", "ecard sk"); k.append(el("span", "ecard-art"), el("span", "ecard-foot")); return k; }));
+    return;
+  }
+  box.hidden = !cats.length;
+  box.replaceChildren(...cats.map((c, i) => {
     const rows = all.filter((t) => catOf(t) === c.id);
     const live = rows.filter((t) => statusOf(t) === "ongoing").length;
     const soon = rows.filter((t) => statusOf(t) === "upcoming").length;
-    const a = el("a", "cat"); a.href = "#/mode/" + c.id; a.style.setProperty("--a", c.a);
-    const ic = el("span", "cat-ic");
-    if (c.img) { const im = el("img"); im.src = c.img; im.alt = ""; im.referrerPolicy = "no-referrer"; im.width = 28; im.height = 28; ic.append(im); } else ic.innerHTML = c.icon; // static trusted SVG from config.js
-    const info = el("span", "cat-info");
-    info.append(el("strong", "", c.name), el("small", "", c.tag));
-    const foot = el("span", "cat-foot", !loaded.t ? "\u2026" : live ? live + " live now" : soon ? soon + " upcoming" : "No matches yet");
-    if (live) foot.classList.add("hot");
-    a.append(ic, info, foot);
+    const a = el("a", "ecard"); a.href = "#/mode/" + c.id; a.style.setProperty("--a", PALETTE[i % PALETTE.length]);
+    a.setAttribute("aria-label", c.name + (c.tag ? ". " + c.tag : ""));
+    const art = el("span", "ecard-art");
+    if (c.img) {
+      const im = el("img"); im.alt = ""; im.loading = "lazy"; im.decoding = "async"; im.referrerPolicy = "no-referrer";
+      im.addEventListener("load", () => im.classList.add("ok"));
+      im.addEventListener("error", () => { im.remove(); art.prepend(iconTile()); }); // broken image: tidy icon tile
+      im.src = c.img; art.append(im);
+    } else art.append(iconTile());
+    art.append(el("span", "ecard-ttl", c.name));
+    if (loaded.t && (live || soon)) art.append(el("span", "ecard-badge" + (live ? " hot" : ""), live ? "\u25CF " + live + " live" : soon + " upcoming"));
+    const foot = el("span", "ecard-foot"); foot.append(el("span", "ecard-ft", c.tag || "View matches"));
+    if (c.tag) foot.title = c.tag;
+    a.append(art, foot);
     return a;
+  }));
+}
+$("#es-retry").addEventListener("click", () => { catsErr = false; loadCategories(); });
+
+/* ---------- My Matches (home): joined matches, grouped by their real status ---------- */
+const MH = [["upcoming", "Upcoming"], ["ongoing", "Ongoing"], ["completed", "Completed"]];
+const MH_LIMIT = 4;           // cards per group before "Show all"
+const mhOpen = {};
+const startMs = (t) => { try { return t.startTime.toMillis(); } catch (_) { return 0; } };
+function renderMyHome() {
+  const box = $("#mh-body"); if (!box) return;
+  const failed = (myFailed && !loaded.my) || (tFailed && !loaded.t);
+  if (failed) {
+    const e = el("div", "homeempty err"); const rb = el("button", "btn ghost sm", "Try again"); rb.type = "button";
+    rb.addEventListener("click", () => { tFailed = false; myFailed = false; renderMyHome(); loadTournaments(); loadMy(); });
+    e.append(el("b", "", "Could not load your matches"), el("span", "", "Check your connection and try again."), rb);
+    box.replaceChildren(e); return;
+  }
+  const ready = loaded.my && loaded.t;
+  const mine = ready ? all.filter((t) => myIds.includes(t.id)) : [];
+  box.replaceChildren(...MH.map(([k, label]) => {
+    const rows = mine.filter((t) => statusOf(t) === k).sort((a, b) => (k === "completed" ? startMs(b) - startMs(a) : startMs(a) - startMs(b)));
+    const g = el("div", "mgroup " + k);
+    const head = el("div", "mg-head"); head.append(el("i", "mg-dot"), el("h3", "", label), el("span", "mg-count", ready ? String(rows.length) : "\u2026"));
+    g.append(head);
+    if (!ready) { g.append(el("div", "mh-skel")); return g; }
+    if (!rows.length) { const e = el("div", "mh-empty"); e.append(el("b", "", "No " + label + " Matches"), el("span", "", "Matches you join will appear here.")); g.append(e); return g; }
+    const open = mhOpen[k] === true, shown = open ? rows : rows.slice(0, MH_LIMIT);
+    const grid = el("div", "tlist mgrid"); grid.append(...shown.map(card)); g.append(grid);
+    if (rows.length > MH_LIMIT) {
+      const more = el("button", "btn ghost sm mh-more", open ? "Show less" : "Show all " + rows.length); more.type = "button";
+      more.addEventListener("click", () => { mhOpen[k] = !open; renderMyHome(); });
+      g.append(more);
+    }
+    return g;
   }));
 }
 
@@ -104,7 +155,7 @@ function renderDetail() {
   const box = $("#d-body");
   const t = all.find((x) => x.id === matchId);
   if (!t) { box.replaceChildren(el("p", "lempty", loaded.t ? "This match was not found. It may have been removed." : "Loading\u2026")); $("#d-back").href = "#/"; return; }
-  $("#d-back").href = "#/mode/" + catOf(t);
+  $("#d-back").href = catOf(t) ? "#/mode/" + catOf(t) : "#/";
   const head = el("div", "thead");
   head.append(el("h2", "dtitle", String(t.title || "Untitled match").slice(0, 80)), el("span", "pill " + statusOf(t), statusOf(t)));
   const cat = cats.find((c) => c.id === catOf(t));
@@ -257,9 +308,9 @@ function renderMatches() {
 async function loadTournaments(force = false) {
   setMsg($("#terr"), "", "");
   $("#refresh").disabled = true;
-  try { all = await getTournaments(force === true); loaded.t = true; }
-  catch (e) { setMsg($("#terr"), "error", friendlyError(e) || "Could not load matches. Check your connection and refresh."); }
-  finally { $("#refresh").disabled = false; renderCats(); if (catId && !$("#v-matches").hidden) renderMatches(); if (matchId && !$("#v-match").hidden) renderDetail(); if (loaded.my && !$("#v-my").hidden) renderMy(); }
+  try { all = await getTournaments(force === true); loaded.t = true; tFailed = false; }
+  catch (e) { tFailed = true; setMsg($("#terr"), "error", friendlyError(e) || "Could not load matches. Check your connection and refresh."); }
+  finally { $("#refresh").disabled = false; renderCats(); if (catId && !$("#v-matches").hidden) renderMatches(); if (matchId && !$("#v-match").hidden) renderDetail(); syncMy(); }
 }
 $$(".tab").forEach((b) => b.addEventListener("click", () => {
   tab = b.dataset.tab;
@@ -437,10 +488,19 @@ function renderFriends() {
 
 /* ---------- my matches ---------- */
 async function loadMy() {
-  setMsg($("#merr"), "", "");
+  setMsg($("#merr"), "", ""); myFailed = false;
   try { myIds = (await getMyRegistrations(authUser.uid)).map((r) => r.tournamentId); myIds.forEach((i) => joinedIds.add(i)); loaded.my = true; }
-  catch (e) { setMsg($("#merr"), "error", friendlyError(e) || "Could not load your matches. Refresh and try again."); return; }
-  renderMy();
+  catch (e) { myFailed = true; setMsg($("#merr"), "error", friendlyError(e) || "Could not load your matches. Refresh and try again."); renderMyHome(); return; }
+  await syncMy();
+}
+/** Joined matches older than the 30 loaded ones are fetched one by one (small, cached), then both My Matches screens are drawn. */
+async function syncMy() {
+  if (loaded.my && loaded.t) {
+    const miss = myIds.filter((id) => !all.some((t) => t.id === id));
+    if (miss.length) { try { const add = (await getTournamentsByIds(miss)).filter((r) => !all.some((t) => t.id === r.id)); if (add.length) all = all.concat(add); } catch (_) {} }
+  }
+  renderMyHome();
+  if (loaded.my && !$("#v-my").hidden) renderMy();
 }
 function renderMy() {
   const mine = all.filter((t) => myIds.includes(t.id));
@@ -519,17 +579,13 @@ function renderSupport() {
 /* ---------- categories + app info (old app: Category, App Info) set from Admin ---------- */
 async function loadCategories() {
   let rows = [];
-  try { rows = await getCategories(); } catch (_) { return; }
-  if (!rows.length) return;
-  const base = new Map(CATEGORIES.map((c) => [c.id, c]));
-  const out = [];
-  rows.sort((a, b) => (Number(b.order) || 0) - (Number(a.order) || 0)).forEach((r) => {
-    const b = base.get(r.id); if (!b || r.active === false) return;
-    out.push({ ...b, name: String(r.title || b.name).slice(0, 40), img: safeUrl(r.imageUrl) });
-    base.delete(r.id);
-  });
-  if (!out.length) return;
-  cats = out; renderCats();
+  try { rows = await getCategories(); } catch (_) { catsErr = true; renderCats(); return; }
+  loaded.cats = true; catsErr = false;
+  cats = rows.filter((r) => r.active !== false && /^[a-z0-9][a-z0-9-]{1,38}$/.test(String(r.id)))
+    .sort((a, b) => (Number(b.order) || 0) - (Number(a.order) || 0))
+    .map((r) => ({ id: r.id, name: String(r.title || r.id).slice(0, 40), tag: String(r.subtitle || "").slice(0, 60), img: safeUrl(r.imageUrl) }));
+  renderCats();
+  if (location.hash.startsWith("#/mode/") || location.hash.startsWith("#/match/")) route();
 }
 async function loadAppInfo() {
   let a = null;
@@ -565,15 +621,13 @@ async function loadUpdates() {
   $("#updates").hidden = false;
 }
 
-/* ---------- sponsor banner ---------- */
+/* ---------- sponsor banner (Admin > Sponsor banners): lowest position first, at most 10 ---------- */
 async function loadSponsor() {
   let rows = [];
-  try { rows = (await getBanners()).filter((b) => safeUrl(b.imageUrl)); } catch (_) { return; }
-  if (!rows.length) return;
-  const box = $("#sponsor"), img = box.querySelector("img"); let i = 0;
-  const show = () => { const b = rows[i % rows.length]; img.src = safeUrl(b.imageUrl); img.referrerPolicy = "no-referrer"; const l = safeUrl(b.linkUrl); if (l) box.href = l; else box.removeAttribute("href"); };
-  show(); box.hidden = false;
-  if (rows.length > 1) setInterval(() => { i++; show(); }, 5000);
+  try { rows = (await getBanners()).filter((b) => b && b.active !== false && safeUrl(b.imageUrl)); } catch (_) { rows = []; }
+  rows.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0) || String(a.id).localeCompare(String(b.id)));
+  if (sponsor) sponsor.destroy();
+  sponsor = mountSponsor({ box: $("#sp"), view: $("#sp-view"), track: $("#sp-track"), dots: $("#sp-dots") }, rows.slice(0, 10), safeUrl);
 }
 
 /* ---------- leaderboard ---------- */
@@ -591,8 +645,8 @@ async function loadBoard() {
     $("#lb-full").replaceChildren(...rows.map((p, i) => row(p, i + 1)));
     $("#lb-mini").replaceChildren(...rows.slice(0, 3).map((p, i) => row(p, i + 1)));
     $("#lb-empty").hidden = rows.length > 0;
-    if (!rows.length) $("#lb-mini").replaceChildren(el("li", "lempty", "Rankings appear after the first match results."));
-  } catch (_) { $("#lb-mini").replaceChildren(el("li", "lempty", "Could not load rankings right now.")); }
+    $("#lb-section").hidden = rows.length === 0;   // nothing to show until the owner adds leaderboard entries
+  } catch (_) { $("#lb-section").hidden = true; }
 }
 
 /* ---------- profile ---------- */
@@ -637,10 +691,8 @@ $("#logout").addEventListener("click", async () => { await logout(); location.re
     return;
   }
   if (useServer()) { try { await ensureSession(); } catch (_) {} } // purane Firebase users ka server account bhi ban jaye
-  const first = (profile.name || "").trim().split(/\s+/)[0];
-  if (first) $("#uname").textContent = first;
-  renderProfile(); renderCats(); route();
+  renderProfile(); renderCats(); renderMyHome(); route();
   $("#app").hidden = false;
   mountAd($("#ad-home"));
-  refreshWallet(); loadTournaments(); loadCategories(); loadAppInfo(); loadSponsor(); loadUpdates(); loadBoard(); loadNotifs();
+  refreshWallet(); loadTournaments(); loadMy(); loadCategories(); loadAppInfo(); loadSponsor(); loadUpdates(); loadBoard(); loadNotifs();
 })();

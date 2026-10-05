@@ -107,3 +107,7 @@ Banner wala match card, slot grid, Watch live, Admin se categories + app info, B
 - 2026-10-04 Task P13: `joinTournament` reads the wallet fresh and writes `winCoins` + registration `winPart`; Profile shows winnings (`getWalletFull`). Rules changed: Publish in Console. Only `node --check` done.
 
 - 2026-10-04 Task A23: read cache in `js/firebase.js` (`cached`, `dropCache`, key prefix `nx_rc1_`). Public lists 2-15 min, slots 20 s, wallet/history/profile/room/results never cached; join clears tournaments/myreg/slots; Refresh button forces a read (max once per 15 s). Rules unchanged. Only `node --check` + node test of Timestamp save/restore done.
+
+
+## 2026-10-05 Home Screen v2
+Sponsor carousel (`js/sponsor.js`) > My Matches > Esports Matches. Details + test result: root README, last Log section. Firestor.rules (banners: title, order) updated.

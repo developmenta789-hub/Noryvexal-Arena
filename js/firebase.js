@@ -211,6 +211,20 @@ export const getTournaments = async (force = false) => {
   }, { force });
 };
 
+/**
+ * Matches the user joined that are NOT in the 30 matches loaded by getTournaments (old finished matches fill that list first).
+ * One small read per missing match (max 20), cached 2 min per match. Used only by My Matches on the home screen.
+ * Server mode already returns up to 100 matches, so nothing extra is read there.
+ */
+export const getTournamentsByIds = async (ids) => {
+  if (useServer()) return [];
+  const rows = await Promise.all([...new Set(ids)].slice(0, 20).map((id) => cached("t_" + id, 120000, async () => {
+    const s = await getDoc(doc(db, "tournaments", id));
+    return s.exists() ? { id: s.id, ...s.data() } : null;
+  }, { persist: false }).catch(() => null)));
+  return rows.filter(Boolean);
+};
+
 /** Coin balance of the signed-in user (0 when no wallet exists yet). Read-only from the site. */
 export const getWallet = async (uid) => {
   if (useServer()) return server.wallet();
@@ -345,9 +359,9 @@ export const getNotifications = async () => cached("notifications", 300000, asyn
 });
 
 /** Active sponsor banners (max 5). Fields: imageUrl, linkUrl, active. */
-export const getBanners = async () => cached("banners", 900000, async () => {   // 15 min
-  const snap = await getDocs(query(collection(db, "banners"), where("active", "==", true), limit(5)));
-  return snap.docs.map((d) => d.data());
+export const getBanners = async () => cached("banners", 300000, async () => {   // 5 min. Sorted + capped to 10 in home.js (home redesign, 2026-10-05)
+  const snap = await getDocs(query(collection(db, "banners"), where("active", "==", true), limit(12)));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 });
 
 /** Top 20 players by points. Fields: name, photoURL, points, kills, wins. Filled later by results feature. */
@@ -356,9 +370,9 @@ export const getLeaderboard = async () => cached("leaderboard", 600000, async ()
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 });
 
-/** Game categories managed from Admin (old app "Category"): { id = game mode id, title, imageUrl, order, active }. Empty = built-in tiles. */
-export const getCategories = async () => cached("categories", 900000, async () => {   // 15 min
-  const snap = await getDocs(query(collection(db, "categories"), limit(20)));
+/** Game categories managed from Admin (old app "Category"): { id = game mode id, title, imageUrl, order, active }. Empty = nothing shown. */
+export const getCategories = async () => cached("categories", 120000, async () => {   // 2 min (owner wants new game modes to show quickly)
+  const snap = await getDocs(query(collection(db, "categories"), limit(30)));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 });
 

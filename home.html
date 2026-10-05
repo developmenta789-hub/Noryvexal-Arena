@@ -16,18 +16,38 @@
   <main id="content" class="content">
 
     <section id="v-home" class="view" data-view="home">
-      <h1 class="hello">Hi, <span id="uname">player</span></h1>
-      <p class="sub">Pick a game mode and join a match.</p>
-      <a id="sponsor" class="sponsor" hidden target="_blank" rel="noopener sponsored"><img alt="Sponsored banner"><span>Sponsored</span></a>
-      <section id="updates" aria-label="Latest updates" hidden>
-        <h2 class="sec">Latest updates</h2>
+
+      <!-- 1. Sponsor banner (Admin > Sponsor banners). Collapses by itself when there is no banner. -->
+      <section id="sp" class="sp" aria-label="Sponsors">
+        <div id="sp-view" class="sp-view is-loading" role="region" aria-roledescription="carousel" aria-label="Sponsor banners">
+          <div id="sp-track" class="sp-track"></div>
+        </div>
+        <div id="sp-dots" class="sp-dots"></div>
+      </section>
+
+      <!-- 2. My Matches: matches the player joined, grouped by their real status -->
+      <section id="mh" class="hsec" aria-labelledby="mh-title">
+        <h2 id="mh-title" class="hsec-title">My Matches</h2>
+        <div id="mh-body" class="mh-body"></div>
+      </section>
+
+      <!-- 3. Esports Matches: sections created in Admin > Categories, max 3 per row -->
+      <section id="es" class="hsec" aria-labelledby="es-title">
+        <h2 id="es-title" class="hsec-title">Esports Matches</h2>
+        <div id="cats" class="egrid" aria-live="polite"></div>
+        <div id="home-empty" class="homeempty" hidden><b>No sections yet</b><span>New esports sections will show up here as soon as they are added.</span></div>
+        <div id="es-err" class="homeempty err" hidden><b>Could not load sections</b><span>Check your connection and try again.</span><button id="es-retry" class="btn ghost sm" type="button">Try again</button></div>
+      </section>
+
+      <section id="updates" class="hsec" aria-label="Latest updates" hidden>
+        <h2 class="hsec-title">Latest updates</h2>
         <div id="ulist" class="ulist"></div>
       </section>
-      <h2 class="sec">Game modes</h2>
-      <div id="cats" class="cats"></div>
       <div id="ad-home" class="adslot" hidden></div>
-      <div class="sechead"><h2 class="sec">Top players</h2><a href="#/board" class="more">See all</a></div>
-      <ol id="lb-mini" class="lb"></ol>
+      <section id="lb-section" class="hsec" hidden>
+        <div class="sechead"><h2 class="hsec-title">Top players</h2><a href="#/board" class="more">See all</a></div>
+        <ol id="lb-mini" class="lb"></ol>
+      </section>
     </section>
 
     <section id="v-matches" class="view" data-view="matches" hidden>
