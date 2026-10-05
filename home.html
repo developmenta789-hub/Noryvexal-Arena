@@ -1,6 +1,6 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#070A12"><meta name="color-scheme" content="dark"><link rel="icon" href="assets/favicon.png"><link rel="preload" href="assets/fonts/Poppins-Regular.ttf" as="font" type="font/ttf" crossorigin><link rel="preload" href="assets/fonts/Poppins-Medium.ttf" as="font" type="font/ttf" crossorigin><link rel="preload" href="assets/fonts/Poppins-Bold.ttf" as="font" type="font/ttf" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap"><link rel="stylesheet" href="css/style.css"><title>Home | Noryvexal Arena</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#031A33"><meta name="color-scheme" content="dark"><link rel="icon" href="assets/favicon.png"><link rel="preload" href="assets/fonts/Poppins-Regular.ttf" as="font" type="font/ttf" crossorigin><link rel="preload" href="assets/fonts/Poppins-Medium.ttf" as="font" type="font/ttf" crossorigin><link rel="preload" href="assets/fonts/Poppins-Bold.ttf" as="font" type="font/ttf" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap"><link rel="stylesheet" href="css/style.css"><title>Home | Noryvexal Arena</title>
 </head>
-<body><div class="bg" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i><i class="grid"></i></div>
+<body class="homepage"><div class="bg" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i><i class="grid"></i></div>
 <section id="blocked" class="blocked" hidden>
   <div class="dbox doc"><h2 id="blocked-title">Account blocked</h2><p id="blocked-text"></p><button id="blocked-out" class="btn" type="button">Log out</button></div>
 </section>
@@ -25,18 +25,22 @@
         <div id="sp-dots" class="sp-dots"></div>
       </section>
 
-      <!-- 2. My Matches: matches the player joined, grouped by their real status -->
+      <!-- 2. My Matches: 3 white tiles (Ongoing / Upcoming / Completed) -> open the player's joined matches -->
       <section id="mh" class="hsec" aria-labelledby="mh-title">
         <h2 id="mh-title" class="hsec-title">My Matches</h2>
-        <div id="mh-body" class="mh-body"></div>
+        <div class="mtiles">
+          <a href="#/my/ongoing" class="mtile"><span class="mt-ic ongoing"><svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 22a14 14 0 0 1 24-8l4 4M38 26a14 14 0 0 1-24 8l-4-4"/><path d="M38 8v10H28M10 40V30h10"/></svg></span><b>Ongoing</b></a>
+          <a href="#/my/upcoming" class="mtile"><span class="mt-ic upcoming"><svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="11" width="30" height="28" rx="5"/><path d="M17 7v8M31 7v8M17 27h12M25 22l5 5-5 5"/></svg></span><b>Upcoming</b></a>
+          <a href="#/my/completed" class="mtile"><span class="mt-ic completed"><svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 25l9 9 16-18"/></svg></span><b>Completed</b></a>
+        </div>
       </section>
 
-      <!-- 3. Esports Matches: sections created in Admin > Categories, max 3 per row -->
+      <!-- 3. Esports Games: cards come ONLY from Admin > Categories (nothing is built in), 3 per row -->
       <section id="es" class="hsec" aria-labelledby="es-title">
-        <h2 id="es-title" class="hsec-title">Esports Matches</h2>
+        <h2 id="es-title" class="hsec-title">Esports Games</h2>
         <div id="cats" class="egrid" aria-live="polite"></div>
-        <div id="home-empty" class="homeempty" hidden><b>No sections yet</b><span>New esports sections will show up here as soon as they are added.</span></div>
-        <div id="es-err" class="homeempty err" hidden><b>Could not load sections</b><span>Check your connection and try again.</span><button id="es-retry" class="btn ghost sm" type="button">Try again</button></div>
+        <div id="home-empty" class="homeempty" hidden><b>No games yet</b><span>New esports games will show up here as soon as the admin adds them.</span></div>
+        <div id="es-err" class="homeempty err" hidden><b>Could not load games</b><span>Check your connection and try again.</span><button id="es-retry" class="btn ghost sm" type="button">Try again</button></div>
       </section>
 
       <section id="updates" class="hsec" aria-label="Latest updates" hidden>

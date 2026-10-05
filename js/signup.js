@@ -1,5 +1,5 @@
 import "./maintenance.js";
-import { googlePopup, logout, auth, getProfile, createProfile, isAllowed, firstAuthState, friendlyError } from "./firebase.js";
+import { googlePopup, logout, auth, getProfile, createProfile, isAllowed, firstAuthState, friendlyError, nextUrl } from "./firebase.js";
 import { $, initBrand, setMsg, setLoading } from "./ui.js";
 
 initBrand();
@@ -20,7 +20,7 @@ terms.addEventListener("change", refresh);
 
 firstAuthState().then(async (u) => {
   if (!u) return;
-  try { if (isAllowed(await getProfile(u.uid))) location.replace("home.html"); } catch (_) {}
+  try { if (isAllowed(await getProfile(u.uid))) location.replace(nextUrl(u)); } catch (_) {}
 });
 
 btn.addEventListener("click", async () => {
@@ -33,12 +33,12 @@ btn.addEventListener("click", async () => {
     const existing = await getProfile(user.uid);
     if (existing) {
       setMsg(msg, "info", "You already have an account. Logging you in…");
-      setTimeout(() => location.replace(isAllowed(existing) ? "home.html" : "login.html"), 900);
+      setTimeout(() => location.replace(isAllowed(existing) ? nextUrl(user) : "login.html"), 900);
       return;
     }
     await createProfile(user);
-    setMsg(msg, "success", "Account created! Taking you in…");
-    setTimeout(() => location.replace("home.html"), 900);
+    setMsg(msg, "success", "Account created! Now set your password…");
+    setTimeout(() => location.replace("password.html"), 900);
   } catch (e) {
     try { if (auth.currentUser && !(await getProfile(auth.currentUser.uid))) await auth.currentUser.delete(); } catch (_) { try { await logout(); } catch (_) {} }
     const t = friendlyError(e);

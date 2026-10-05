@@ -1,5 +1,5 @@
 import "./maintenance.js";
-import { ensureSession, firstAuthState, getProfile, isAllowed, logout, getTournaments, getCategories, getAppInfo, getBanners, getLeaderboard, getAnnouncements, getNotifications, getWallet, getWalletFull, getCoinHistory, saveGameProfile, getMyFriendCode, createFriendCode, addFriendByCode, getFriends, removeFriend, getMyTeam, createTeam, joinTeam, leaveTeam, disbandTeam, getMyRegistrations, getTournamentsByIds, getMyTickets, createTicket, isJoined, getRoom, getResult, getResultPlayers, getSlots, joinTournament, friendlyError } from "./firebase.js";
+import { ensureSession, gateFor, firstAuthState, getProfile, isAllowed, logout, getTournaments, getCategories, getAppInfo, getBanners, getLeaderboard, getAnnouncements, getNotifications, getWallet, getWalletFull, getCoinHistory, saveGameProfile, getMyFriendCode, createFriendCode, addFriendByCode, getFriends, removeFriend, getMyTeam, createTeam, joinTeam, leaveTeam, disbandTeam, getMyRegistrations, getTournamentsByIds, getMyTickets, createTicket, isJoined, getRoom, getResult, getResultPlayers, getSlots, joinTournament, friendlyError } from "./firebase.js";
 import { $, initBrand, setMsg, mountAd } from "./ui.js";
 import { useServer, server } from "./api.js";
 import { mountSponsor } from "./sponsor.js";
@@ -34,7 +34,7 @@ function route() {
   if (h.startsWith("mode/")) { catId = h.slice(5); v = cats.some((c) => c.id === catId) ? "matches" : "home"; }
   else if (h.startsWith("match/")) { matchId = h.slice(6); v = "match"; }
   else if (h === "board") v = "board";
-  else if (h === "my") v = "my";
+  else if (h === "my" || h.startsWith("my/")) { v = "my"; const q = h.slice(3); if ([ "ongoing", "upcoming", "completed" ].includes(q)) { mtab = q; $$(".mtab").forEach((x) => { const on = x.dataset.mtab === q; x.classList.toggle("on", on); x.setAttribute("aria-selected", on); }); } }
   else if (h === "notifications") v = "notif";
   else if (h === "team") v = "team";
   else if (h === "friends") v = "friends";
@@ -86,10 +86,9 @@ function renderCats() {
       im.addEventListener("error", () => { im.remove(); art.prepend(iconTile()); }); // broken image: tidy icon tile
       im.src = c.img; art.append(im);
     } else art.append(iconTile());
-    art.append(el("span", "ecard-ttl", c.name));
     if (loaded.t && (live || soon)) art.append(el("span", "ecard-badge" + (live ? " hot" : ""), live ? "\u25CF " + live + " live" : soon + " upcoming"));
-    const foot = el("span", "ecard-foot"); foot.append(el("span", "ecard-ft", c.tag || "View matches"));
-    if (c.tag) foot.title = c.tag;
+    const foot = el("span", "ecard-foot"); foot.append(el("span", "ecard-ft", c.name));
+    foot.title = c.tag || c.name;
     a.append(art, foot);
     return a;
   }));
@@ -101,34 +100,7 @@ const MH = [["upcoming", "Upcoming"], ["ongoing", "Ongoing"], ["completed", "Com
 const MH_LIMIT = 4;           // cards per group before "Show all"
 const mhOpen = {};
 const startMs = (t) => { try { return t.startTime.toMillis(); } catch (_) { return 0; } };
-function renderMyHome() {
-  const box = $("#mh-body"); if (!box) return;
-  const failed = (myFailed && !loaded.my) || (tFailed && !loaded.t);
-  if (failed) {
-    const e = el("div", "homeempty err"); const rb = el("button", "btn ghost sm", "Try again"); rb.type = "button";
-    rb.addEventListener("click", () => { tFailed = false; myFailed = false; renderMyHome(); loadTournaments(); loadMy(); });
-    e.append(el("b", "", "Could not load your matches"), el("span", "", "Check your connection and try again."), rb);
-    box.replaceChildren(e); return;
-  }
-  const ready = loaded.my && loaded.t;
-  const mine = ready ? all.filter((t) => myIds.includes(t.id)) : [];
-  box.replaceChildren(...MH.map(([k, label]) => {
-    const rows = mine.filter((t) => statusOf(t) === k).sort((a, b) => (k === "completed" ? startMs(b) - startMs(a) : startMs(a) - startMs(b)));
-    const g = el("div", "mgroup " + k);
-    const head = el("div", "mg-head"); head.append(el("i", "mg-dot"), el("h3", "", label), el("span", "mg-count", ready ? String(rows.length) : "\u2026"));
-    g.append(head);
-    if (!ready) { g.append(el("div", "mh-skel")); return g; }
-    if (!rows.length) { const e = el("div", "mh-empty"); e.append(el("b", "", "No " + label + " Matches"), el("span", "", "Matches you join will appear here.")); g.append(e); return g; }
-    const open = mhOpen[k] === true, shown = open ? rows : rows.slice(0, MH_LIMIT);
-    const grid = el("div", "tlist mgrid"); grid.append(...shown.map(card)); g.append(grid);
-    if (rows.length > MH_LIMIT) {
-      const more = el("button", "btn ghost sm mh-more", open ? "Show less" : "Show all " + rows.length); more.type = "button";
-      more.addEventListener("click", () => { mhOpen[k] = !open; renderMyHome(); });
-      g.append(more);
-    }
-    return g;
-  }));
-}
+function renderMyHome() {} // home now shows 3 tiles (Ongoing / Upcoming / Completed) that open #/my/<tab>
 
 /* ---------- matches ---------- */
 function card(t) {
@@ -683,6 +655,7 @@ $("#logout").addEventListener("click", async () => { await logout(); location.re
   authUser = u;
   try { profile = await getProfile(u.uid); } catch (_) {}
   if (!isAllowed(profile)) { await logout(); return location.replace("login.html"); }
+  if (gateFor(u) !== "ok") return location.replace("password.html"); // set / confirm password first
   if (profile.status === "banned" || profile.status === "suspended") { // old app Banned / Suspended screens
     const b = $("#blocked"); b.dataset.state = profile.status;
     $("#blocked-title").textContent = profile.status === "banned" ? "Account banned" : "Account suspended";

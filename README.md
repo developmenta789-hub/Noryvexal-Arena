@@ -111,3 +111,13 @@ Banner wala match card, slot grid, Watch live, Admin se categories + app info, B
 
 ## 2026-10-05 Home Screen v2
 Sponsor carousel (`js/sponsor.js`) > My Matches > Esports Matches. Details + test result: root README, last Log section. Firestor.rules (banners: title, order) updated.
+
+
+## 2026-10-05 Password step (Arena)
+Google sign-up/login now has a password step. New page `password.html` + `js/password.js`; helpers in `js/firebase.js` (`gateFor`, `nextUrl`, `setNewPassword`, `confirmPassword`, `resetPasswordMail`).
+- Sign up: age + terms > Google > **password.html (set)**: password + confirm, eye show/hide, strength bar, rules, match check > home.
+- Login: Google > if the Google account has no profile in Firestore `users` it is sent to **signup.html**; if it has one > **password.html (confirm)** > home. Older accounts without a password are asked to set one first.
+- The password is an email+password sign-in LINKED to the Google account in Firebase Auth (same uid). It is never stored in Firestore. Payvex asks for the same password.
+- `home.html`, `index.html`, `login.html`, `signup.html` all check `gateFor(user)`; `logout()` clears the confirmation.
+- **Owner must do once:** Firebase Console > Authentication > Sign-in method > enable **Email/Password**. Firestore rules: no change.
+- The confirmation flag is kept in the browser (`nx_pwok`), so this step protects a login on a shared device; the hard security stays Google sign-in + Firestore rules.

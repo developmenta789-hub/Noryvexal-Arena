@@ -1,5 +1,5 @@
 import "./maintenance.js";
-import { ensureSession, googlePopup, logout, auth, getProfile, isAllowed, firstAuthState, friendlyError } from "./firebase.js";
+import { ensureSession, googlePopup, logout, auth, getProfile, isAllowed, firstAuthState, friendlyError, nextUrl } from "./firebase.js";
 import { $, initBrand, setMsg, setLoading } from "./ui.js";
 import { useServer } from "./api.js";
 
@@ -9,7 +9,7 @@ const btn = $("#google"), msg = $("#msg");
 // Already signed in with a valid profile: go straight to home.
 firstAuthState().then(async (u) => {
   if (!u) return;
-  try { if (isAllowed(await getProfile(u.uid))) location.replace("home.html"); } catch (_) {}
+  try { if (isAllowed(await getProfile(u.uid))) location.replace(nextUrl(u)); } catch (_) {}
 });
 
 btn.addEventListener("click", async () => {
@@ -22,8 +22,10 @@ btn.addEventListener("click", async () => {
     if (!profile) {
       // Never signed up: login is not allowed. Remove the unused auth account.
       try { await user.delete(); } catch (_) { await logout(); }
-      setMsg(msg, "error", "This account isn't registered yet. Please sign up before logging in.");
+      // Google account not in Firebase yet: send the player to sign up (age check + Google + password).
+      setMsg(msg, "info", "No Noryvexal account found for this Google account. Taking you to sign up…");
       $("#signup-hint").classList.add("attn");
+      setTimeout(() => location.replace("signup.html"), 1800);
       return;
     }
     if (!isAllowed(profile)) {
@@ -32,7 +34,7 @@ btn.addEventListener("click", async () => {
       return;
     }
     if (useServer()) await ensureSession(); // server par account (pehli baar login par ban jata hai)
-    location.replace("home.html");
+    location.replace(nextUrl(user)); // password.html (set / confirm password) or home.html
   } catch (e) {
     try { if (auth.currentUser) await logout(); } catch (_) {}
     const t = friendlyError(e);

@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
+  EmailAuthProvider, linkWithCredential, reauthenticateWithCredential, sendPasswordResetEmail,
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp,
@@ -68,13 +69,30 @@ const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 
 export const googlePopup = () => signInWithPopup(auth, provider);
-export const logout = () => { dropCache("myreg_"); return signOut(auth); };
+const PWK = "nx_pwok";   // password step: uid that already confirmed its password on this browser
+let pwMem = null;        // fallback when localStorage is blocked
+export const logout = () => { dropCache("myreg_"); pwMem = null; try { localStorage.removeItem(PWK); } catch (_) {} return signOut(auth); };
 
 /** Resolves once with the first auth state on page load. */
 export const firstAuthState = () =>
   new Promise((resolve) => {
     const off = onAuthStateChanged(auth, (u) => { off(); resolve(u); });
   });
+
+/* ---------- password step (2026-10-05) ----------
+ * The Google account gets an email+password sign-in LINKED to it (same uid, same Firestore profile).
+ * setup   = account has no password yet (new sign-up, or an older account)
+ * confirm = has a password but it was not typed on this browser since the last login
+ * ok      = confirmed, go to home. The password lives only in Firebase Auth (never in Firestore). */
+export const hasPassword = (u) => !!u && u.providerData.some((p) => p.providerId === "password");
+export const pwVerified = (u) => { if (!u) return false; try { return localStorage.getItem(PWK) === u.uid; } catch (_) { return pwMem === u.uid; } };
+export const markPwVerified = (u) => { pwMem = u.uid; try { localStorage.setItem(PWK, u.uid); } catch (_) {} };
+export const gateFor = (u) => (!hasPassword(u) ? "setup" : pwVerified(u) ? "ok" : "confirm");
+/** Where a signed-in, allowed player must go next. */
+export const nextUrl = (u) => (gateFor(u) === "ok" ? "home.html" : "password.html");
+export const setNewPassword = async (u, pw) => { await linkWithCredential(u, EmailAuthProvider.credential(u.email, pw)); markPwVerified(u); };
+export const confirmPassword = async (u, pw) => { await reauthenticateWithCredential(u, EmailAuthProvider.credential(u.email, pw)); markPwVerified(u); };
+export const resetPasswordMail = (email) => sendPasswordResetEmail(auth, email);
 
 export const getProfile = async (uid) => {
   const snap = await getDoc(doc(db, "users", uid));
@@ -396,6 +414,11 @@ export const friendlyError = (e) => {
   if (c === "app/slot-taken") return "This slot was just taken by someone else. Please pick another slot.";
   if (c === "auth/network-request-failed") return "Please check your internet connection and try again.";
   if (c === "auth/unauthorized-domain") return "This domain is not authorized in Firebase. Add it under Authentication > Settings > Authorized domains.";
+  if (c === "auth/wrong-password" || c === "auth/invalid-credential" || c === "auth/invalid-login-credentials") return "Wrong password. Please try again.";
+  if (c === "auth/too-many-requests") return "Too many attempts. Wait a few minutes, or use Forgot password.";
+  if (c === "auth/weak-password") return "That password is too weak. Use at least 8 characters.";
+  if (c === "auth/requires-recent-login") return "For safety, please log in with Google again and then continue.";
+  if (c === "auth/credential-already-in-use" || c === "auth/email-already-in-use") return "This email already has a password login. Please contact support.";
   if (c === "auth/operation-not-allowed") return "Google sign-in is not enabled in the Firebase Console.";
   if (c === "permission-denied" || (e && /permission/i.test(e.message || ""))) return "Permission denied. Make sure the latest Firestore rules are published.";
   return "Something went wrong. Please try again in a moment.";

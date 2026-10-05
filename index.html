@@ -1,9 +1,9 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#070A12"><link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="css/style.css"><title>Noryvexal Arena</title>
 <script type="module">
-import { firstAuthState, getProfile, isAllowed } from "./js/firebase.js";
+import { firstAuthState, getProfile, isAllowed, nextUrl } from "./js/firebase.js";
 const u = await firstAuthState(); let ok = false;
 try { ok = !!u && isAllowed(await getProfile(u.uid)); } catch (_) {}
-location.replace(ok ? "home.html" : "login.html");
+location.replace(ok ? nextUrl(u) : "login.html");
 </script></head><style>
 /* splash = purane Arena app ka splash (dark #1A1F2E, NORYVEXAL / ARENA / PLAY MORE) */
 body{background:#1A1F2E;color:#fff}

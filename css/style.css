@@ -500,3 +500,71 @@ a.sp-slide:focus-visible{outline:2px solid var(--cyan);outline-offset:-3px}
 .mgrid{grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr))}
 @media (max-width:519px){.ecard-art{aspect-ratio:16/9}}
 .hsec{scroll-margin-top:80px}
+
+/* ---------- password step (2026-10-05): password.html ---------- */
+.btn.pri{background:linear-gradient(90deg,var(--blue),var(--violet));color:#fff;box-shadow:0 12px 26px -12px rgba(47,128,255,.7);margin-top:6px}
+.btn.pri .spinner{border-color:rgba(255,255,255,.35);border-top-color:#fff}
+.btn.pri.loading span{opacity:.0;position:absolute}
+.who{display:flex;align-items:center;gap:12px;text-align:left;margin:0 0 18px;padding:10px 14px;border-radius:var(--r-md);background:var(--surface-2);border:1px solid var(--line)}
+.who img{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none;background:rgba(255,255,255,.06)}
+.who span{min-width:0;display:flex;flex-direction:column;line-height:1.35}
+.who b{font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who i{font-style:normal;font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fld{display:block;text-align:left;margin-bottom:12px}
+.lbl{display:block;font-size:12.5px;color:var(--dim);margin:0 0 6px 4px;font-weight:500}
+.pw{position:relative;display:block}
+.pw input{width:100%;min-height:54px;padding:14px 52px 14px 16px;border-radius:var(--r-md);border:1.5px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);font:400 16px var(--font);letter-spacing:.02em;outline:0;transition:border-color .2s,box-shadow .2s,background-color .2s}
+.pw input::placeholder{color:rgba(154,168,199,.55);letter-spacing:0}
+.pw input:focus{border-color:var(--blue);background:rgba(47,128,255,.07);box-shadow:0 0 0 4px rgba(47,128,255,.16)}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:42px;height:42px;display:grid;place-items:center;border:0;border-radius:12px;background:transparent;color:var(--dim);cursor:pointer;transition:color .2s,background-color .2s}
+.eye svg{width:21px;height:21px}
+.eye .i-hide{display:none}.eye.on .i-hide{display:block}.eye.on .i-show{display:none}
+.eye.on{color:var(--cyan)}
+.eye:focus-visible{outline:2px solid var(--cyan);outline-offset:1px}
+@media (hover:hover){.eye:hover{background:rgba(255,255,255,.07);color:var(--text)}}
+.meter{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:2px 4px 0}
+.meter i{height:5px;border-radius:3px;background:rgba(255,255,255,.1);transition:background-color .3s}
+.meter[data-s="1"] i:nth-child(-n+1){background:var(--err)}
+.meter[data-s="2"] i:nth-child(-n+2){background:#FFB84D}
+.meter[data-s="3"] i:nth-child(-n+3){background:#7BDC6B}
+.meter[data-s="4"] i:nth-child(-n+4){background:var(--ok)}
+.mtxt{text-align:left;font-size:12.5px;color:var(--dim);margin:6px 4px 8px;min-height:19px}
+.rules{list-style:none;padding:0;margin:0 4px 14px;display:flex;flex-wrap:wrap;gap:6px 14px;text-align:left}
+.rules li{font-size:12.5px;color:var(--dim);display:flex;align-items:center;gap:6px;transition:color .25s}
+.rules li::before{content:"";width:8px;height:8px;border-radius:50%;border:1.5px solid var(--dim);transition:background-color .25s,border-color .25s}
+.rules li.ok{color:var(--ok)}.rules li.ok::before{background:var(--ok);border-color:var(--ok)}
+.mtch{text-align:left;font-size:12.5px;margin:-2px 4px 12px;min-height:19px;color:var(--dim)}
+.mtch.ok{color:var(--ok)}.mtch.bad{color:var(--err)}
+.link{display:block;margin:14px auto 0;padding:6px 10px;border:0;background:none;color:var(--cyan);font:500 13.5px var(--font);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.link:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){.meter i,.rules li,.rules li::before,.pw input{transition:none}}
+
+/* ===== Home redesign (2026-10-05): navy theme, banner, 3 white My Matches tiles, 3-column Esports Games ===== */
+.homepage{--bg:#031A33;--surface:#0A2547;--surface-2:#10305A;--line:#14375F}
+.homepage .bg{background:#031A33}
+.homepage .hsec-title{justify-content:center;font-family:var(--font);font-weight:500;font-size:clamp(22px,6vw,28px);letter-spacing:0;margin:0 0 16px}
+.homepage .hsec-title::before{display:none}
+.homepage .hsec{margin-top:26px}
+.homepage .sp-view{border-radius:14px;border:0;aspect-ratio:2.2/1;box-shadow:none}
+.homepage .sp-slide::after{display:none}
+.homepage .sp-dots{margin-top:14px}
+.homepage .sp-dot::before{background:#0B2240}
+.homepage .sp-dot.on::before{width:8px;background:#E50914;box-shadow:none}
+.mtiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.mtile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;aspect-ratio:1/.9;border-radius:10px;background:#fff;color:#0B1220;text-decoration:none;transition:transform .15s var(--ease)}
+.mtile:active{transform:scale(.97)}
+.mtile b{font-size:clamp(14px,4.4vw,20px);font-weight:600;letter-spacing:.01em}
+.mt-ic{width:clamp(48px,15vw,62px);height:clamp(48px,15vw,62px);border-radius:16px;display:grid;place-items:center}
+.mt-ic svg{width:62%;height:62%}
+.mt-ic.ongoing{background:#1FA67A;border-radius:50%}
+.mt-ic.upcoming{background:linear-gradient(135deg,#00D08A,#0A8BEA)}
+.mt-ic.completed{background:#16B364;border-radius:10px;width:clamp(42px,13vw,54px);height:clamp(42px,13vw,54px)}
+.homepage .egrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.homepage .ecard{border-radius:10px;border:0;background:#1C2640;box-shadow:none}
+@media (hover:hover){.homepage .ecard:hover{transform:none;box-shadow:none}}
+.homepage .ecard-art{aspect-ratio:1/.8}
+.homepage .ecard-art::after{display:none}
+.homepage .ecard-foot{height:auto;min-height:40px;padding:8px 6px;background:#1C2640;border-top:0}
+.homepage .ecard-ft{font-size:clamp(13px,3.9vw,18px);font-weight:500;text-transform:uppercase;-webkit-line-clamp:1;color:#fff}
+.homepage .ecard-ic{width:44px;height:44px}
+.homepage .ecard-badge{top:6px;left:6px;font-size:10px;padding:4px 8px}
