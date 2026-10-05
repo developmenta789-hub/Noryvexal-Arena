@@ -1,5 +1,5 @@
 import "./maintenance.js";
-import { ensureSession, firstAuthState, getProfile, isAllowed, logout, getTournaments, getCategories, getAppInfo, getBanners, getLeaderboard, getAnnouncements, getNotifications, getWallet, getCoinHistory, saveGameProfile, getMyFriendCode, createFriendCode, addFriendByCode, getFriends, removeFriend, getMyTeam, createTeam, joinTeam, leaveTeam, disbandTeam, getMyRegistrations, getMyTickets, createTicket, isJoined, getRoom, getResult, getResultPlayers, getSlots, joinTournament, friendlyError } from "./firebase.js";
+import { ensureSession, firstAuthState, getProfile, isAllowed, logout, getTournaments, getCategories, getAppInfo, getBanners, getLeaderboard, getAnnouncements, getNotifications, getWallet, getWalletFull, getCoinHistory, saveGameProfile, getMyFriendCode, createFriendCode, addFriendByCode, getFriends, removeFriend, getMyTeam, createTeam, joinTeam, leaveTeam, disbandTeam, getMyRegistrations, getMyTickets, createTicket, isJoined, getRoom, getResult, getResultPlayers, getSlots, joinTournament, friendlyError } from "./firebase.js";
 import { $, initBrand, setMsg, mountAd } from "./ui.js";
 import { CATEGORIES } from "./config.js";
 import { useServer, server } from "./api.js";
@@ -25,6 +25,7 @@ const teamLabel = (t) => { const n = teamSizeOf(t); return n === 1 ? "Solo" : n 
 const entry = (n) => (Number(n) > 0 ? Number(n) + " coins" : "Free");
 const slots = (t) => (t.maxPlayers ? (Number(t.joined) || 0) + "/" + t.maxPlayers : "\u2014");
 const money = (n) => (Number(n) > 0 ? "\u20B9" + Number(n) : "Free");
+const started = (t) => { try { return t.startTime.toMillis() <= Date.now(); } catch (_) { return false; } }; // task 3: start time passed = joining closed
 const when = (ts) => { try { return ts.toDate().toLocaleString([], { dateStyle: "medium", timeStyle: "short" }); } catch (_) { return "Time to be announced"; } };
 const safeUrl = (u) => { try { const x = new URL(u); return x.protocol === "https:" ? x.href : ""; } catch (_) { return ""; } };
 const stat = (label, value) => { const d = el("div", "tstat"); d.append(el("span", "tl", label), el("strong", "", value)); return d; };
@@ -151,8 +152,10 @@ function renderSlots(t, box, sm, pick, canPick, onPick) {
   box.replaceChildren(h, list, el("p", "tmeta", taken + " of " + max + " slots taken" + (ts > 1 ? " \u2022 each player picks their own slot" : "")));
 }
 async function refreshWallet() {
-  try { coins = await getWallet(authUser.uid); } catch (_) {}
+  let win = 0;
+  try { const w = await getWalletFull(authUser.uid); coins = w.coins; win = w.win; } catch (_) {}
   $("#coins").textContent = coins; $("#p-coins").textContent = coins;
+  const pw = $("#p-win"); if (pw) pw.textContent = win;   // task 4: winnings = the part you can withdraw in Payvex
 }
 /** Room ID + password, shown only to players who joined (Firestore rules enforce this, not this code). */
 async function loadRoom(t, box) {
@@ -206,6 +209,7 @@ async function setupJoin(t, btn, rm, sbox) {
   if (t.status === "cancelled") return stop("Match cancelled (entry fee refunded)");
   if (joined) return stop("You joined this match");
   if (statusOf(t) !== "upcoming") return stop("Registration closed");
+  if (started(t)) return stop("Registration closed (match has started)");
   if (t.joinEnabled === false) return stop("Joining is paused for this match");
   const max = Math.min(Number(t.maxPlayers) || 0, 100);
   if (!max) return stop("Slots will be announced");
@@ -232,7 +236,7 @@ async function setupJoin(t, btn, rm, sbox) {
       await refreshWallet(); renderDetail();
       setMsg($("#d-msg"), "success", "Slot #" + pick + " reserved. Joined match successfully. Good luck!");
     } catch (e) {
-      let fresh = null; try { fresh = await getSlots(t.id); } catch (_) {}
+      let fresh = null; try { fresh = await getSlots(t.id, true); } catch (_) {}
       if (matchId !== t.id) return;
       if (fresh) sm = fresh;
       if (sm[pick] != null) { pick = 0; setMsg($("#d-msg"), "error", friendlyError({ code: "app/slot-taken" })); }
@@ -250,10 +254,10 @@ function renderMatches() {
   $("#tempty-title").textContent = names[tab];
   $("#tempty-text").textContent = "Check another tab, or come back later. New matches are announced here.";
 }
-async function loadTournaments() {
+async function loadTournaments(force = false) {
   setMsg($("#terr"), "", "");
   $("#refresh").disabled = true;
-  try { all = await getTournaments(); loaded.t = true; }
+  try { all = await getTournaments(force === true); loaded.t = true; }
   catch (e) { setMsg($("#terr"), "error", friendlyError(e) || "Could not load matches. Check your connection and refresh."); }
   finally { $("#refresh").disabled = false; renderCats(); if (catId && !$("#v-matches").hidden) renderMatches(); if (matchId && !$("#v-match").hidden) renderDetail(); if (loaded.my && !$("#v-my").hidden) renderMy(); }
 }
@@ -262,7 +266,7 @@ $$(".tab").forEach((b) => b.addEventListener("click", () => {
   $$(".tab").forEach((x) => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-selected", on); });
   renderMatches();
 }));
-$("#refresh").addEventListener("click", loadTournaments);
+$("#refresh").addEventListener("click", () => loadTournaments(true));   // task 5: button = fresh read (max once per 15 s), page load = cache
 
 /* ---------- notifications (bell) ---------- */
 let notifs = [], notifOk = false, notifTried = false;

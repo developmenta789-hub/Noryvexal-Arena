@@ -4,7 +4,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp,
-  collection, query, orderBy, limit, getDocs, where, writeBatch, increment, deleteDoc, addDoc,
+  collection, query, orderBy, limit, getDocs, where, writeBatch, increment, deleteDoc, addDoc, Timestamp,
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import { firebaseConfig } from "./config.js";
 import { useServer, server, bindAuth, ensureSession } from "./api.js";
@@ -12,13 +12,63 @@ import { useServer, server, bindAuth, ensureSession } from "./api.js";
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app); // (default) database
+
+/* ---------- read cache (task 5, 2026-10-04) ----------
+ * Why: Firebase Spark (free) plan = 50,000 reads/day. A cold home screen reads ~100 docs (matches 30, categories 20, notices 10 + 20,
+ * leaderboard 20, banners 5, appInfo 1, my matches up to 50). Public lists change rarely, so they are kept in localStorage for a few minutes
+ * (per key TTL below). Every read still goes through Firestore Rules; the cache only avoids asking the same thing again.
+ * - Timestamps are saved as {__ts: ms} and revived as real Timestamp objects (the UI calls toMillis/toDate).
+ * - If a fresh read fails (offline) and an older copy exists, the older copy is shown.
+ * - Join / leave style writes call dropCache(...) so the user's own screens never show old numbers.
+ * - Refresh button: force=true refetches, but never more than once per 15 s per key (gap), so button spam cannot burn the quota.
+ * - Wallet, coin history, room, results, profile are NEVER cached (money and match-critical data are always read live). */
+const CK = "nx_rc1_";
+const memCache = new Map();
+const inflight = new Map();
+const encode = (v) => JSON.stringify(v, function (k, val) { const raw = this[k]; return raw instanceof Timestamp ? { __ts: raw.toMillis() } : val; });
+const decode = (s) => JSON.parse(s, (k, val) => (val && typeof val === "object" && typeof val.__ts === "number" ? Timestamp.fromMillis(val.__ts) : val));
+const cacheGet = (key, persist) => {
+  const m = memCache.get(key);
+  if (m) return m;
+  if (!persist) return null;
+  try {
+    const s = localStorage.getItem(CK + key);
+    if (!s) return null;
+    const o = decode(s);
+    if (o && typeof o.t === "number") { memCache.set(key, o); return o; }
+  } catch (_) {}
+  return null;
+};
+const cachePut = (key, v, persist) => {
+  const o = { t: Date.now(), v };
+  memCache.set(key, o);
+  if (persist) { try { localStorage.setItem(CK + key, encode(o)); } catch (_) {} }
+};
+/** Forget cached reads whose key starts with prefix ("" = everything). */
+export const dropCache = (prefix = "") => {
+  for (const k of [...memCache.keys()]) if (k.startsWith(prefix)) memCache.delete(k);
+  try { for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && k.startsWith(CK + prefix)) localStorage.removeItem(k); } } catch (_) {}
+};
+async function cached(key, ttl, fn, { force = false, persist = true, gap = 15000 } = {}) {
+  const hit = cacheGet(key, persist);
+  const age = hit ? Date.now() - hit.t : Infinity;
+  if (hit && age < ttl && !(force && age >= gap)) return hit.v;
+  if (inflight.has(key)) return inflight.get(key);
+  const p = (async () => {
+    try { const v = await fn(); cachePut(key, v, persist); return v; }
+    catch (e) { if (hit) return hit.v; throw e; }
+    finally { inflight.delete(key); }
+  })();
+  inflight.set(key, p);
+  return p;
+}
 bindAuth(async () => { if (!auth.currentUser) throw new Error("not signed in"); return auth.currentUser.getIdToken(); });
 export { ensureSession };
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 
 export const googlePopup = () => signInWithPopup(auth, provider);
-export const logout = () => signOut(auth);
+export const logout = () => { dropCache("myreg_"); return signOut(auth); };
 
 /** Resolves once with the first auth state on page load. */
 export const firstAuthState = () =>
@@ -153,10 +203,12 @@ export const getFriends = async (uid) => {
 export const removeFriend = (uid, fuid) => deleteDoc(doc(db, "friends", uid, "list", fuid));
 
 /** Latest tournaments, oldest start first. One read per tournament, limited to 30. */
-export const getTournaments = async () => {
+export const getTournaments = async (force = false) => {
   if (useServer()) return server.tournaments();
-  const snap = await getDocs(query(collection(db, "tournaments"), orderBy("startTime", "asc"), limit(30)));
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return cached("tournaments", 120000, async () => {   // 2 min
+    const snap = await getDocs(query(collection(db, "tournaments"), orderBy("startTime", "asc"), limit(30)));
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  }, { force });
 };
 
 /** Coin balance of the signed-in user (0 when no wallet exists yet). Read-only from the site. */
@@ -164,6 +216,13 @@ export const getWallet = async (uid) => {
   if (useServer()) return server.wallet();
   const s = await getDoc(doc(db, "wallets", uid));
   return s.exists() ? Number(s.data().coins) || 0 : 0;
+};
+/** task 4: { coins, win } where win = winnings (the only part that can be withdrawn in Payvex). */
+export const getWalletFull = async (uid) => {
+  if (useServer()) return { coins: await server.wallet(), win: 0 };
+  const s = await getDoc(doc(db, "wallets", uid));
+  const d = s.exists() ? s.data() : {};
+  return { coins: Number(d.coins) || 0, win: Math.min(Number(d.winCoins) || 0, Number(d.coins) || 0) };
 };
 
 /** Room ID + password. Rules let only a player who joined this match read it. Returns null when not set yet. */
@@ -189,8 +248,10 @@ export const getResultPlayers = async (tid) => {
 /** Matches the user joined: one query on own registrations (rules need where uid == myUid), max 50. */
 export const getMyRegistrations = async (uid) => {
   if (useServer()) return server.myRegistrations();
-  const snap = await getDocs(query(collection(db, "registrations"), where("uid", "==", uid), limit(50)));
-  return snap.docs.map((d) => d.data());
+  return cached("myreg_" + uid, 120000, async () => {   // 2 min, cleared on join and on logout
+    const snap = await getDocs(query(collection(db, "registrations"), where("uid", "==", uid), limit(50)));
+    return snap.docs.map((d) => d.data());
+  });
 };
 
 export const isJoined = async (tid, uid) => useServer() ? server.isJoined(tid) : (await getDoc(doc(db, "registrations", tid + "_" + uid))).exists();
@@ -200,39 +261,51 @@ export const isJoined = async (tid, uid) => useServer() ? server.isJoined(tid) :
 export const getTeamReg = async (tid, teamId) => useServer() ? false : (await getDoc(doc(db, "teamRegs", tid + "_" + teamId))).exists();
 
 /** OLD APP slot grid: slot number -> player name for one match (tournaments/{tid}/slots, max 100 docs, one query). */
-export const getSlots = async (tid) => {
+export const getSlots = async (tid, force = false) => cached("slots_" + tid, 20000, async () => {   // 20 s, memory only; force = always fresh
   const snap = await getDocs(query(collection(db, "tournaments", tid, "slots"), limit(100)));
   const m = {};
   snap.docs.forEach((d) => { m[Number(d.id)] = String((d.data() || {}).name || "Player"); });
   return m;
-};
+}, { persist: false, force, gap: 0 });
 
 /**
  * OLD APP join: the player picks ONE slot. One atomic batch (Firestore rules check all of it together):
  * registration (with slot) + slot doc (name) + coins - fee + joined + 1. If someone took the slot first, the batch fails.
  * Duo/Squad: every teammate joins from their own account and picks their own slot.
  */
-export const joinTournament = (t, user, name, slot) => {
+export const joinTournament = async (t, user, name, slot) => {
   const fee = Number(t.entryFee) || 0;
   const n = Number(slot);
   const nick = String(name || "Player").slice(0, 100);
+  // task 4: wallet = coins + winCoins (winnings). Fee is paid from deposit coins first, winnings last. Fresh read right before the write.
+  let winPart = 0, newWin = 0;
+  if (fee > 0) {
+    const ws = await getDoc(doc(db, "wallets", user.uid));
+    const w = ws.exists() ? ws.data() : {};
+    const oldWin = Number(w.winCoins) || 0;
+    newWin = Math.min(oldWin, (Number(w.coins) || 0) - fee);
+    winPart = oldWin - newWin;
+  }
   const b = writeBatch(db);
-  b.set(doc(db, "registrations", t.id + "_" + user.uid), { tournamentId: t.id, uid: user.uid, name: nick, fee, slot: n, createdAt: serverTimestamp() });
+  const reg = { tournamentId: t.id, uid: user.uid, name: nick, fee, slot: n, createdAt: serverTimestamp() };
+  if (winPart > 0) reg.winPart = winPart;
+  b.set(doc(db, "registrations", t.id + "_" + user.uid), reg);
   b.set(doc(db, "tournaments", t.id, "slots", String(n)), { uid: user.uid, name: nick, createdAt: serverTimestamp() });
-  if (fee > 0) b.update(doc(db, "wallets", user.uid), { coins: increment(-fee), lastJoin: t.id });
+  if (fee > 0) b.update(doc(db, "wallets", user.uid), { coins: increment(-fee), lastJoin: t.id, winCoins: newWin });
   b.update(doc(db, "tournaments", t.id), { joined: increment(1) });
-  return b.commit();
+  await b.commit();
+  dropCache("tournaments"); dropCache("myreg_"); dropCache("slots_");   // task 5: own screens must not show old numbers
 };
 
 /**
- * Coin history (A18) bina server ke: apni hi deposits, withdrawals, prizeCredits aur registrations se banti hai.
+ * Coin history (A18) bina server ke: apni hi deposits, withdrawals, prizeCredits, registrations aur refunds se banti hai.
  * Har query sirf `where uid == myUid` (rules ke hisaab se) + limit 50, koi index nahi chahiye (free plan). Naye upar.
  * Row: { type, delta (+/-), note, createdAt }.
  */
 export const getCoinHistory = async (uid) => {
   if (useServer()) return server.coinHistory();
   const q = (col) => getDocs(query(collection(db, col), where("uid", "==", uid), limit(50)));
-  const [dep, wd, pz, reg] = await Promise.all([q("deposits"), q("withdrawals"), q("prizeCredits"), q("registrations")]);
+  const [dep, wd, pz, reg, rfd] = await Promise.all([q("deposits"), q("withdrawals"), q("prizeCredits"), q("registrations"), q("refunds")]);
   const rows = [];
   dep.docs.forEach((d) => { const x = d.data(); if (x.status === "approved") rows.push({ type: "deposit", delta: Number(x.amount) || 0, note: "", createdAt: x.reviewedAt || x.createdAt }); });
   wd.docs.forEach((d) => {
@@ -242,6 +315,7 @@ export const getCoinHistory = async (uid) => {
   });
   pz.docs.forEach((d) => { const x = d.data(); rows.push({ type: "prize", delta: Number(x.amount) || 0, note: x.tournamentTitle || "", createdAt: x.createdAt }); });
   reg.docs.forEach((d) => { const x = d.data(); const f = Number(x.fee) || 0; if (f > 0) rows.push({ type: "join", delta: -f, note: "", createdAt: x.createdAt }); });
+  rfd.docs.forEach((d) => { const x = d.data(); rows.push({ type: "refund", delta: Number(x.amount) || 0, note: x.tournamentTitle || "", createdAt: x.createdAt }); });
   const ms = (r) => { try { return r.createdAt.toMillis(); } catch (_) { return 0; } };
   return rows.sort((a, b) => ms(b) - ms(a)).slice(0, 100);
 };
@@ -259,40 +333,40 @@ export const createTicket = (user, playerName, subject, message) =>
   addDoc(collection(db, "tickets"), { uid: user.uid, name: playerName, subject, message, status: "open", createdAt: serverTimestamp() });
 
 /** Latest announcements (max 10). Fields: title, message, pinned, createdAt. */
-export const getAnnouncements = async () => {
+export const getAnnouncements = async () => cached("announcements", 300000, async () => {   // 5 min
   const snap = await getDocs(query(collection(db, "announcements"), orderBy("createdAt", "desc"), limit(10)));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-};
+});
 
 /** Latest notices for the bell (max 20, one query). Fields: title, message, type, createdAt. */
-export const getNotifications = async () => {
+export const getNotifications = async () => cached("notifications", 300000, async () => {   // 5 min
   const snap = await getDocs(query(collection(db, "notifications"), orderBy("createdAt", "desc"), limit(20)));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-};
+});
 
 /** Active sponsor banners (max 5). Fields: imageUrl, linkUrl, active. */
-export const getBanners = async () => {
+export const getBanners = async () => cached("banners", 900000, async () => {   // 15 min
   const snap = await getDocs(query(collection(db, "banners"), where("active", "==", true), limit(5)));
   return snap.docs.map((d) => d.data());
-};
+});
 
 /** Top 20 players by points. Fields: name, photoURL, points, kills, wins. Filled later by results feature. */
-export const getLeaderboard = async () => {
+export const getLeaderboard = async () => cached("leaderboard", 600000, async () => {   // 10 min
   const snap = await getDocs(query(collection(db, "leaderboard"), orderBy("points", "desc"), limit(20)));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-};
+});
 
 /** Game categories managed from Admin (old app "Category"): { id = game mode id, title, imageUrl, order, active }. Empty = built-in tiles. */
-export const getCategories = async () => {
+export const getCategories = async () => cached("categories", 900000, async () => {   // 15 min
   const snap = await getDocs(query(collection(db, "categories"), limit(20)));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-};
+});
 
 /** App info from Admin (old app "App Info"): whatsappUrl, youtubeUrl, termsText, privacyText. One read, null when not set. */
-export const getAppInfo = async () => {
+export const getAppInfo = async () => cached("appinfo", 300000, async () => {   // 5 min
   const s = await getDoc(doc(db, "appInfo", "main"));
   return s.exists() ? s.data() : null;
-};
+});
 
 /** Only users who signed up as 18+ are allowed in. */
 export const isAllowed = (p) => !!p && p.age18Plus === true;

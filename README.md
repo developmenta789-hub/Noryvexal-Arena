@@ -99,3 +99,11 @@ Banner wala match card, slot grid, Watch live, Admin se categories + app info, B
 - 2026-10-02 Task 4 (old app slot flow): match detail ab purane app jaisa slot picker deta hai (`renderSlots`/`setupJoin` in `js/home.js`, `getSlots`/`joinTournament(t, user, name, slot)` in `js/firebase.js`, `.srow` CSS neeche). Profile mein optional mobile + Share app, notification tap par detail dialog. `Firestor.rules` CHANGED (okJoin, `tournaments/{id}/slots`, `users.mobile`): Publish in Console. Browser mein chala nahi, rules test nahi hue. Team ab join ke liye zaroori nahi.
 
 - 2026-10-02 Task 5: purana Results list. `getResultPlayers` (`js/firebase.js`) + `loadResult` (`js/home.js`) match detail par Player/Kills/Winning table dikhate hain (`results/{tid}/players`). Rules changed: Publish in Console. Chala nahi, sirf `node --check`.
+
+- 2026-10-04 Task D18 (Arena part): coin history now also reads `refunds` (label "Match refund"). Cancelled matches already showed as cancelled. Rules changed: Publish in Console. Only `node --check` done.
+
+- 2026-10-04 Task A22: match detail closes joining once `startTime` passes (`started()` in `js/home.js`); the real lock is in `Firestor.rules` (`okJoin`). Rules changed: Publish in Console. Only `node --check` done.
+
+- 2026-10-04 Task P13: `joinTournament` reads the wallet fresh and writes `winCoins` + registration `winPart`; Profile shows winnings (`getWalletFull`). Rules changed: Publish in Console. Only `node --check` done.
+
+- 2026-10-04 Task A23: read cache in `js/firebase.js` (`cached`, `dropCache`, key prefix `nx_rc1_`). Public lists 2-15 min, slots 20 s, wallet/history/profile/room/results never cached; join clears tournaments/myreg/slots; Refresh button forces a read (max once per 15 s). Rules unchanged. Only `node --check` + node test of Timestamp save/restore done.
