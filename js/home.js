@@ -28,7 +28,7 @@ const money = (n) => (Number(n) > 0 ? "\u20B9" + Number(n) : "Free");
 const started = (t) => { try { return t.startTime.toMillis() <= Date.now(); } catch (_) { return false; } }; // task 3: start time passed = joining closed
 const when = (ts) => { try { return ts.toDate().toLocaleString([], { dateStyle: "medium", timeStyle: "short" }); } catch (_) { return "Time to be announced"; } };
 const safeUrl = (u) => { try { const x = new URL(u); return x.protocol === "https:" ? x.href : ""; } catch (_) { return ""; } };
-const stat = (label, value) => { const d = el("div", "tstat"); d.append(el("span", "tl", label), el("strong", "", value)); return d; };
+const stat = (label, value) => { const d = el("div", label === "Prize pool" ? "tstat prize" : "tstat"); d.append(el("span", "tl", label), el("strong", "", value)); return d; };
 
 /* ---------- router ---------- */
 function route() {
