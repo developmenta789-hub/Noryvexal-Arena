@@ -111,11 +111,12 @@ export const createProfile = async (user) => {
   if (useServer()) await ensureSession(); // server par bhi account (wallet 0 coins)
 };
 
-/** Saves the two editable profile fields (Firestore rules allow only these). */
-export const saveGameProfile = async (uid, ingameName, gameUid, mobile = "") => {
-  if (useServer()) await server.saveGameProfile(ingameName, gameUid); // server pehle (wahi validate karta hai)
-  const data = { ingameName, gameUid };
-  if (mobile) data.mobile = mobile; // old app Edit Profile: optional 10-digit mobile number
+/** Saves the Arena game profile (nickname, UID, level). Firestor.rules allow only these fields (+ resetting gameVerified to false).
+ *  This users/{uid} document is the single source of truth: Join and Payvex Withdraw read it, nothing is copied. */
+export const saveGameProfile = async (uid, ingameName, gameUid, gameLevel, resetVerified = false) => {
+  if (useServer()) await server.saveGameProfile(ingameName, gameUid, gameLevel); // server pehle (wahi validate karta hai)
+  const data = { ingameName, gameUid, gameLevel };
+  if (resetVerified) data.gameVerified = false; // details changed after the owner verified them: needs a new check
   return updateDoc(doc(db, "users", uid), data);
 };
 
@@ -327,29 +328,6 @@ export const joinTournament = async (t, user, name, slot) => {
   b.update(doc(db, "tournaments", t.id), { joined: increment(1) });
   await b.commit();
   dropCache("tournaments"); dropCache("myreg_"); dropCache("slots_");   // task 5: own screens must not show old numbers
-};
-
-/**
- * Coin history (A18) bina server ke: apni hi deposits, withdrawals, prizeCredits, registrations aur refunds se banti hai.
- * Har query sirf `where uid == myUid` (rules ke hisaab se) + limit 50, koi index nahi chahiye (free plan). Naye upar.
- * Row: { type, delta (+/-), note, createdAt }.
- */
-export const getCoinHistory = async (uid) => {
-  if (useServer()) return server.coinHistory();
-  const q = (col) => getDocs(query(collection(db, col), where("uid", "==", uid), limit(50)));
-  const [dep, wd, pz, reg, rfd] = await Promise.all([q("deposits"), q("withdrawals"), q("prizeCredits"), q("registrations"), q("refunds")]);
-  const rows = [];
-  dep.docs.forEach((d) => { const x = d.data(); if (x.status === "approved") rows.push({ type: "deposit", delta: Number(x.amount) || 0, note: "", createdAt: x.reviewedAt || x.createdAt }); });
-  wd.docs.forEach((d) => {
-    const x = d.data(); const a = Number(x.amount) || 0;
-    rows.push({ type: "withdraw", delta: -a, note: x.status === "approved" ? "Paid" : x.status === "rejected" ? "Rejected" : "Pending", createdAt: x.createdAt });
-    if (x.status === "rejected") rows.push({ type: "withdraw_refund", delta: a, note: "", createdAt: x.reviewedAt || x.createdAt });
-  });
-  pz.docs.forEach((d) => { const x = d.data(); rows.push({ type: "prize", delta: Number(x.amount) || 0, note: x.tournamentTitle || "", createdAt: x.createdAt }); });
-  reg.docs.forEach((d) => { const x = d.data(); const f = Number(x.fee) || 0; if (f > 0) rows.push({ type: "join", delta: -f, note: "", createdAt: x.createdAt }); });
-  rfd.docs.forEach((d) => { const x = d.data(); rows.push({ type: "refund", delta: Number(x.amount) || 0, note: x.tournamentTitle || "", createdAt: x.createdAt }); });
-  const ms = (r) => { try { return r.createdAt.toMillis(); } catch (_) { return 0; } };
-  return rows.sort((a, b) => ms(b) - ms(a)).slice(0, 100);
 };
 
 /* ---------- support tickets (A16) ---------- */

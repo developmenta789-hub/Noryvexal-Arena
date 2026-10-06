@@ -1,5 +1,5 @@
 import "./maintenance.js";
-import { ensureSession, gateFor, firstAuthState, getProfile, isAllowed, logout, getTournaments, getCategories, getAppInfo, getBanners, getLeaderboard, getAnnouncements, getNotifications, getWallet, getWalletFull, getCoinHistory, saveGameProfile, getMyFriendCode, createFriendCode, addFriendByCode, getFriends, removeFriend, getMyTeam, createTeam, joinTeam, leaveTeam, disbandTeam, getMyRegistrations, getTournamentsByIds, getMyTickets, createTicket, isJoined, getRoom, getResult, getResultPlayers, getSlots, joinTournament, friendlyError } from "./firebase.js";
+import { ensureSession, gateFor, firstAuthState, getProfile, isAllowed, logout, getTournaments, getCategories, getAppInfo, getBanners, getLeaderboard, getAnnouncements, getNotifications, getWallet, getWalletFull, saveGameProfile, getMyFriendCode, createFriendCode, addFriendByCode, getFriends, removeFriend, getMyTeam, createTeam, joinTeam, leaveTeam, disbandTeam, getMyRegistrations, getTournamentsByIds, getMyTickets, createTicket, isJoined, getRoom, getResult, getResultPlayers, getSlots, joinTournament, friendlyError } from "./firebase.js";
 import { $, initBrand, setMsg, mountAd } from "./ui.js";
 import { useServer, server } from "./api.js";
 import { mountSponsor } from "./sponsor.js";
@@ -38,12 +38,11 @@ function route() {
   else if (h === "notifications") v = "notif";
   else if (h === "team") v = "team";
   else if (h === "friends") v = "friends";
-  else if (h === "coins") v = "coins";
   else if (h === "support") v = "support";
   else if (h === "about" || h === "terms" || h === "privacy") v = h;
   else if (h === "profile") v = "profile";
   $$(".view").forEach((s) => (s.hidden = s.dataset.view !== v));
-  $$("[data-nav]").forEach((a) => { const on = a.dataset.nav === (v === "matches" || v === "match" ? "home" : ["about", "terms", "privacy", "team", "friends", "coins", "support"].includes(v) ? "profile" : v); a.classList.toggle("on", on); on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"); });
+  $$("[data-nav]").forEach((a) => { const on = a.dataset.nav === (v === "matches" || v === "match" ? "home" : ["about", "terms", "privacy", "team", "friends", "support"].includes(v) ? "profile" : v); a.classList.toggle("on", on); on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"); });
   if (v === "home") renderMyHome();
   if (v === "matches") { $("#m-title").textContent = cats.find((c) => c.id === catId).name; renderMatches(); mountAd($("#ad-matches")); }
   if (v === "match") renderDetail();
@@ -51,7 +50,6 @@ function route() {
   if (v === "notif") showNotifs();
   if (v === "team") loadTeam();
   if (v === "friends") loadFriends();
-  if (v === "coins") loadCoinHistory();
   if (v === "support") loadSupport();
   if (v === "my") { loaded.my ? renderMy() : loadMy(); }
   window.scrollTo(0, 0);
@@ -237,7 +235,7 @@ async function setupJoin(t, btn, rm, sbox) {
   const max = Math.min(Number(t.maxPlayers) || 0, 100);
   if (!max) return stop("Slots will be announced");
   if (Object.keys(sm).length >= max || (Number(t.joined) || 0) >= max) return stop("MATCH FULL");
-  if (!(profile.ingameName || "").trim()) return stop("Set your in-game name first (Profile)");
+  if (!gameDone()) return stop("Complete your game details first (Profile: nickname, UID, level)");
   if (fee > coins) return stop("Not enough coins (need " + fee + ")");
   const nick = playerName();
   let pick = 0;
@@ -331,6 +329,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("#ndlg")
 
 /* ---------- team (A12) ---------- */
 let team = null, teamState = "idle";
+const gameDone = () => (profile.ingameName || "").trim().length >= 2 && /^[0-9]{6,15}$/.test(profile.gameUid || "") && Number.isInteger(Number(profile.gameLevel)) && Number(profile.gameLevel) >= 1 && Number(profile.gameLevel) <= 100;
 const playerName = () => (profile.ingameName || profile.name || "Player").trim().slice(0, 100);
 async function loadTeam() {
   const box = $("#team-body"); setMsg($("#team-msg"), "", "");
@@ -489,26 +488,6 @@ $$(".mtab").forEach((b) => b.addEventListener("click", () => {
   renderMy();
 }));
 
-/* ---------- coin history (A18, Firestore se; server mode mein server se) ---------- */
-const COIN_LABELS = { deposit: "Deposit added", join: "Match entry fee", prize: "Prize won", refund: "Match refund", withdraw: "Withdraw request", withdraw_refund: "Withdraw returned" };
-async function loadCoinHistory() {
-  setMsg($("#cerr"), "", "");
-  const list = $("#clist"), empty = $("#cempty");
-  let rows;
-  try { rows = await getCoinHistory(authUser.uid); }
-  catch (e) { setMsg($("#cerr"), "error", friendlyError(e) || "Could not load your coin history. Refresh and try again."); return; }
-  empty.hidden = rows.length > 0;
-  list.replaceChildren(...rows.map((r) => {
-    const plus = Number(r.delta) > 0;
-    const c = el("article", "ucard");
-    const h = el("div", "thead");
-    h.append(el("h3", "", COIN_LABELS[r.type] || "Coins"), el("span", "pill " + (plus ? "ongoing" : "upcoming"), (plus ? "+" : "") + Number(r.delta) + " coins"));
-    const note = r.note ? String(r.note).slice(0, 80) : "";
-    c.append(h, el("p", "umsg", [note, r.balanceAfter != null ? "Balance: " + Number(r.balanceAfter) : ""].filter(Boolean).join(" | ")), el("p", "twhen", when(r.createdAt)));
-    return c;
-  }));
-}
-
 /* ---------- help and support (A16): ticket banao, Admin ka reply dekho ---------- */
 let tickets = [];
 async function loadSupport() {
@@ -626,18 +605,24 @@ function renderProfile() {
   $("#p-name").textContent = profile.name || "Player";
   $("#p-email").textContent = profile.email || "";
   try { $("#p-since").textContent = "Member since " + profile.createdAt.toDate().toLocaleDateString([], { dateStyle: "medium" }); } catch (_) {}
-  $("#g-name").value = profile.ingameName || ""; $("#g-uid").value = profile.gameUid || ""; $("#g-mobile").value = profile.mobile || "";
-  $("#g-status").textContent = profile.ingameName && profile.gameUid ? "Game ID: saved" : "Game ID: not set yet (needed to join matches)";
+  $("#g-name").value = profile.ingameName || ""; $("#g-uid").value = profile.gameUid || ""; $("#g-level").value = profile.gameLevel || "";
+  $("#g-status").textContent = gameDone() ? (profile.gameVerified === true ? "Game details: saved and verified" : "Game details: saved (the team verifies them before your first withdrawal)") : "Game details: incomplete. Add nickname, UID and level to join matches and withdraw.";
   const u = safeUrl(profile.photoURL);
   if (u) { const i = $("#p-photo"); i.src = u; i.referrerPolicy = "no-referrer"; i.hidden = false; const a = $("#avatar"); a.src = u; a.referrerPolicy = "no-referrer"; a.hidden = false; }
 }
 $("#g-save").addEventListener("click", async () => {
-  const n = $("#g-name").value.trim(), g = $("#g-uid").value.trim(), mb = $("#g-mobile").value.trim(), msg = $("#g-msg");
-  if (n.length < 2 || n.length > 30) return setMsg(msg, "error", "Enter your in-game name (2 to 30 characters).");
+  const n = $("#g-name").value.trim(), g = $("#g-uid").value.trim(), lv = $("#g-level").value.trim(), msg = $("#g-msg");
+  if (n.length < 2 || n.length > 30) return setMsg(msg, "error", "Enter your game nickname (2 to 30 characters).");
   if (!/^[0-9]{6,15}$/.test(g)) return setMsg(msg, "error", "UID must be 6 to 15 digits, numbers only.");
-  if (mb && !/^[0-9]{10}$/.test(mb)) return setMsg(msg, "error", "Mobile number must be exactly 10 digits.");
+  if (!/^[0-9]{1,3}$/.test(lv) || Number(lv) < 1 || Number(lv) > 100) return setMsg(msg, "error", "Level must be a number from 1 to 100.");
   const b = $("#g-save"); b.disabled = true; setMsg(msg, "", "");
-  try { await saveGameProfile(authUser.uid, n, g, mb); profile.ingameName = n; profile.gameUid = g; if (mb) profile.mobile = mb; renderProfile(); setMsg(msg, "success", "Saved."); }
+  const changed = n !== (profile.ingameName || "") || g !== (profile.gameUid || "") || Number(lv) !== Number(profile.gameLevel || 0);
+  try {
+    await saveGameProfile(authUser.uid, n, g, Number(lv), changed && profile.gameVerified === true);   // changed details need a new verification
+    profile.ingameName = n; profile.gameUid = g; profile.gameLevel = Number(lv);
+    if (changed && profile.gameVerified === true) profile.gameVerified = false;
+    renderProfile(); setMsg(msg, "success", "Saved.");
+  }
   catch (e) { setMsg(msg, "error", friendlyError(e) || "Could not save. Please try again."); }
   finally { b.disabled = false; }
 });

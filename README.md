@@ -121,3 +121,8 @@ Google sign-up/login now has a password step. New page `password.html` + `js/pas
 - `home.html`, `index.html`, `login.html`, `signup.html` all check `gateFor(user)`; `logout()` clears the confirmation.
 - **Owner must do once:** Firebase Console > Authentication > Sign-in method > enable **Email/Password**. Firestore rules: no change.
 - The confirmation flag is kept in the browser (`nx_pwok`), so this step protects a login on a shared device; the hard security stays Google sign-in + Firestore rules.
+
+| 2026-10-06 | Bottom navigation redesigned (owner request): floating glass pill, active tab gets a gradient capsule + cyan icon, reduced-motion respected. Only CSS appended at the end of `css/style.css` ("bottom nav v2"); `home.html` / JS unchanged; `.content` bottom padding raised to 112px so nothing hides behind the floating bar. | Not run in browser |
+
+
+| 2026-10-06 | Profile: Phone/Mobile field removed, **Game level** (1..100) added; coin history removed (screen, route, query, link). Profile data = single source for Join + Payvex Withdraw (`gameDone()` in `home.js` mirrors `gameDone` in `Firestor.rules`). Changing nickname/UID/level after owner verification sends `gameVerified:false`. `Firestor.rules` changed: re-publish in Console. Not run against real Firebase. |

@@ -55,14 +55,12 @@ export async function ensureSession() {
 export const server = {
   tournaments: async () => ((await call("/api/tournaments?limit=100", { auth: false })).items || []).map(tournament),
   wallet: async () => Number((await call("/api/wallet")).coins) || 0,
-  /** A18: coin history (ledger), newest first. Each row: delta (+/-), balanceAfter, type, note, createdAt (ms). */
-  coinHistory: async () => ((await call("/api/wallet/history?limit=100")).items || []).map((r) => ({ ...r, createdAt: ts(r.createdAt) })),
   room: async (tid) => { const r = (await call("/api/tournaments/" + encodeURIComponent(tid) + "/room")).room; return r ? { ...r, updatedAt: ts(r.updatedAt) } : null; },
   result: async (tid) => { const r = (await call("/api/tournaments/" + encodeURIComponent(tid) + "/results", { auth: false })).result; return r ? { ...r, publishedAt: ts(r.publishedAt) } : null; },
   myRegistrations: async () => (await registrations(true)).map((r) => ({ ...r, createdAt: ts(r.createdAt) })),
   isJoined: async (tid) => (await registrations(false)).some((r) => r.tournamentId === tid),
   join: async (tid) => { const r = await call("/api/tournaments/" + encodeURIComponent(tid) + "/join", { method: "POST" }); regCache.at = 0; return r; },
-  saveGameProfile: (ingameName, gameUid) => call("/api/me", { method: "PATCH", body: { ingameName, gameUid } }),
+  saveGameProfile: (ingameName, gameUid, gameLevel) => call("/api/me", { method: "PATCH", body: { ingameName, gameUid, gameLevel } }),
   myTeam: async () => team((await call("/api/my/team")).team),
   createTeam: (name) => call("/api/teams", { method: "POST", body: { name } }),
   joinTeam: (code) => call("/api/teams/join", { method: "POST", body: { code } }),

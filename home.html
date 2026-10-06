@@ -86,14 +86,6 @@
       <div id="merr" class="msg" role="alert"></div>
     </section>
 
-    <section id="v-coins" class="view" data-view="coins" hidden>
-      <div class="back"><h1>Coin history</h1></div>
-      <p class="tmeta">Your latest 100 coin changes. Deposits and withdrawals are done in the Payvex app.</p>
-      <div id="clist" class="ulist" aria-live="polite"></div>
-      <div id="cempty" class="panel" hidden><h2>No coin activity yet</h2><p>Deposits, entry fees, prizes and refunds will appear here.</p></div>
-      <div id="cerr" class="msg" role="alert"></div>
-    </section>
-
     <section id="v-notif" class="view" data-view="notif" hidden>
       <div class="back"><h1>Notifications</h1></div>
       <div id="nlist" class="ulist" aria-live="polite"></div>
@@ -187,19 +179,18 @@
       </div>
       <div class="dbox">
         <h3>Game details</h3>
-        <p class="tmeta">Your Free Fire in-game name and UID. Room hosts use these to find you.</p>
-        <label class="flabel" for="g-name">In-game name</label>
+        <p class="tmeta">Fill your Free Fire nickname, UID and level to join matches and to withdraw winnings.</p>
+        <label class="flabel" for="g-name">Game nickname</label>
         <input id="g-name" class="finput" type="text" maxlength="30" autocomplete="off" placeholder="Your Free Fire name">
-        <label class="flabel" for="g-uid">Free Fire UID (numbers only)</label>
+        <label class="flabel" for="g-uid">Game ID / UID (numbers only)</label>
         <input id="g-uid" class="finput" type="text" inputmode="numeric" maxlength="15" autocomplete="off" placeholder="e.g. 123456789">
-        <label class="flabel" for="g-mobile">Mobile number (optional, 10 digits)</label>
-        <input id="g-mobile" class="finput" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="e.g. 9876543210">
+        <label class="flabel" for="g-level">Free Fire level (1 to 100)</label>
+        <input id="g-level" class="finput" type="text" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="e.g. 45">
         <p id="g-status" class="tmeta"></p>
         <button id="g-save" class="btn" type="button"><span>Save</span></button>
         <div id="g-msg" class="msg" role="alert"></div>
       </div>
       <div class="dbox links">
-        <a href="#/coins" class="lrow2">Coin history<span aria-hidden="true">&rsaquo;</span></a>
         <a href="#/friends" class="lrow2">Friends<span aria-hidden="true">&rsaquo;</span></a>
         <a href="#/team" class="lrow2">My team<span aria-hidden="true">&rsaquo;</span></a>
         <a href="#/support" class="lrow2">Help and support<span aria-hidden="true">&rsaquo;</span></a>

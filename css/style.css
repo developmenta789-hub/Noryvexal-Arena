@@ -568,3 +568,15 @@ a.sp-slide:focus-visible{outline:2px solid var(--cyan);outline-offset:-3px}
 .homepage .ecard-ft{font-size:clamp(13px,3.9vw,18px);font-weight:500;text-transform:uppercase;-webkit-line-clamp:1;color:#fff}
 .homepage .ecard-ic{width:44px;height:44px}
 .homepage .ecard-badge{top:6px;left:6px;font-size:10px;padding:4px 8px}
+
+/* ---------- bottom nav v2: floating glass pill, active tab gets a gradient capsule ---------- */
+.content{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
+.bottom{left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));padding:6px;gap:4px;justify-content:space-between;border:1px solid rgba(130,160,230,.22);border-radius:26px;background:rgba(11,17,36,.86);-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);box-shadow:0 14px 34px -10px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.06)}
+.bottom a{position:relative;isolation:isolate;gap:3px;padding:9px 0 7px;border-radius:20px;font-size:11px;font-weight:500;color:var(--dim);transition:color .2s var(--ease)}
+.bottom a svg{width:23px;height:23px;transition:transform .28s var(--ease),color .2s}
+.bottom a::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:20px;opacity:0;transform:scale(.85);background:linear-gradient(135deg,rgba(47,128,255,.30),rgba(124,92,255,.34));border:1px solid rgba(124,92,255,.5);box-shadow:0 6px 18px -6px rgba(124,92,255,.65);transition:opacity .22s var(--ease),transform .28s var(--ease)}
+.bottom a.on{color:#fff;font-weight:600}
+.bottom a.on::before{opacity:1;transform:scale(1)}
+.bottom a.on svg{color:var(--cyan);transform:translateY(-1px) scale(1.08)}
+.bottom a:active svg{transform:scale(.92)}
+@media (prefers-reduced-motion:reduce){.bottom a,.bottom a svg,.bottom a::before{transition:none}}
