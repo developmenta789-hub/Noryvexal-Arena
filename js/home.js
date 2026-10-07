@@ -21,7 +21,7 @@ const teamSizeOf = (t) => Number(t.teamSize) || 1;
 const teamLabel = (t) => { const n = teamSizeOf(t); return n === 1 ? "Solo" : n === 2 ? "Duo" : n === 4 ? "Squad" : n + " players"; };
 const entry = (n) => (Number(n) > 0 ? Number(n) + " coins" : "Free");
 const slots = (t) => (t.maxPlayers ? (Number(t.joined) || 0) + "/" + t.maxPlayers : "\u2014");
-const money = (n) => (Number(n) > 0 ? "\u20B9" + Number(n) : "Free");
+const money = (n) => (Number(n) > 0 ? "\u20B9" + Number(n) : "\u2014");
 const started = (t) => { try { return t.startTime.toMillis() <= Date.now(); } catch (_) { return false; } }; // task 3: start time passed = joining closed
 const when = (ts) => { try { return ts.toDate().toLocaleString([], { dateStyle: "medium", timeStyle: "short" }); } catch (_) { return "Time to be announced"; } };
 const safeUrl = (u) => { try { const x = new URL(u); return x.protocol === "https:" ? x.href : ""; } catch (_) { return ""; } };
@@ -38,11 +38,12 @@ function route() {
   else if (h === "notifications") v = "notif";
   else if (h === "team") v = "team";
   else if (h === "friends") v = "friends";
+  else if (h === "game") v = "game";
   else if (h === "support") v = "support";
   else if (h === "about" || h === "terms" || h === "privacy") v = h;
   else if (h === "profile") v = "profile";
   $$(".view").forEach((s) => (s.hidden = s.dataset.view !== v));
-  $$("[data-nav]").forEach((a) => { const on = a.dataset.nav === (v === "matches" || v === "match" ? "home" : ["about", "terms", "privacy", "team", "friends", "support"].includes(v) ? "profile" : v); a.classList.toggle("on", on); on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"); });
+  $$("[data-nav]").forEach((a) => { const on = a.dataset.nav === (v === "matches" || v === "match" ? "home" : ["about", "terms", "privacy", "team", "friends", "support", "game"].includes(v) ? "profile" : v); a.classList.toggle("on", on); on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"); });
   if (v === "home") renderMyHome();
   if (v === "matches") { $("#m-title").textContent = cats.find((c) => c.id === catId).name; renderMatches(); mountAd($("#ad-matches")); }
   if (v === "match") renderDetail();
@@ -142,7 +143,8 @@ function renderDetail() {
   const kids = [];
   const bu = safeUrl(t.bannerUrl);
   if (bu) { const ban = el("div", "tban big"); const im = el("img"); im.src = bu; im.alt = ""; im.referrerPolicy = "no-referrer"; ban.append(im, el("span", "tbadge", "FREE FIRE")); kids.push(ban); }
-  kids.push(head, el("p", "tmeta", [cat && cat.name, t.game, teamLabel(t), t.mode, t.map].filter(Boolean).join(" \u2022 ")), stats, el("p", "twhen", "Starts " + when(t.startTime)));
+  const same = (a, b) => String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
+  kids.push(head, el("p", "tmeta", [cat && cat.name, t.game, teamLabel(t), same(t.mode, teamLabel(t)) ? "" : t.mode, t.map].filter(Boolean).join(" \u2022 ")), stats, el("p", "twhen", "Starts " + when(t.startTime)));
   const lv = safeUrl(t.liveUrl);
   if (lv) { const a = el("a", "btn live", "Watch live"); a.href = lv; a.target = "_blank"; a.rel = "noopener noreferrer"; kids.push(a); }
   const sbox = el("div", "dbox"); sbox.append(el("h3", "", "Slots"), el("p", "tmeta", "Loading\u2026"));
@@ -229,13 +231,18 @@ async function setupJoin(t, btn, rm, sbox) {
   const stop = (text) => { btn.textContent = text; btn.disabled = true; renderSlots(t, sbox, sm, 0, false); };
   if (t.status === "cancelled") return stop("Match cancelled (entry fee refunded)");
   if (joined) return stop("You joined this match");
-  if (statusOf(t) !== "upcoming") return stop("Registration closed");
+  if (statusOf(t) !== "upcoming") return stop(statusOf(t) === "ongoing" ? "Registration closed (match is ongoing)" : "Registration closed (match is over)");
   if (started(t)) return stop("Registration closed (match has started)");
   if (t.joinEnabled === false) return stop("Joining is paused for this match");
   const max = Math.min(Number(t.maxPlayers) || 0, 100);
   if (!max) return stop("Slots will be announced");
   if (Object.keys(sm).length >= max || (Number(t.joined) || 0) >= max) return stop("MATCH FULL");
-  if (!gameDone()) return stop("Complete your game details first (Profile: nickname, UID, level)");
+  if (!gameDone()) { // not filled: cannot join, but one tap opens the form
+    renderSlots(t, sbox, sm, 0, false);
+    btn.textContent = "Add game details to join"; btn.disabled = false; btn.onclick = () => { location.hash = "#/game"; };
+    return setMsg($("#d-msg"), "error", "Fill your game nickname, UID and level first. Approval is not needed to play.");
+  }
+  if (minLevel > 0 && Number(profile.gameLevel) < minLevel) return stop("Minimum level to join is " + minLevel + " (your level: " + Number(profile.gameLevel) + ")");
   if (fee > coins) return stop("Not enough coins (need " + fee + ")");
   const nick = playerName();
   let pick = 0;
@@ -542,6 +549,8 @@ async function loadAppInfo() {
   let a = null;
   try { a = await getAppInfo(); } catch (_) { return; }
   if (!a) return;
+  minLevel = Math.max(0, Math.min(100, Number(a.minGameLevel) || 0));
+  renderProfile(); if (location.hash.startsWith("#/match/")) renderDetail();
   const about = $("#v-about .doc");
   [["WhatsApp", a.whatsappUrl], ["YouTube", a.youtubeUrl]].forEach(([n, u]) => {
     const l = safeUrl(u); if (!l) return;
@@ -601,12 +610,24 @@ async function loadBoard() {
 }
 
 /* ---------- profile ---------- */
+/** Game details state: pend = not filled, rev = filled and waiting for the team, ok = approved (users.gameVerified). */
+let minLevel = 0;   // appInfo/main.minGameLevel (0 = no minimum); Firestor.rules enforce it on join
+const gdState = () => (!gameDone() ? "pend" : profile.gameVerified === true ? "ok" : "rev");
+const GD_LABEL = { pend: "Pending", rev: "Approval pending", ok: "Approved" };
+const GD_TEXT = {
+  pend: "Not filled yet. Fill your nickname, UID and level to join matches.",
+  rev: "Saved. Waiting for approval. The team approves your game account when you withdraw.",
+  ok: "Approved by the team. Your game account is ready for withdrawal.",
+};
 function renderProfile() {
   $("#p-name").textContent = profile.name || "Player";
   $("#p-email").textContent = profile.email || "";
   try { $("#p-since").textContent = "Member since " + profile.createdAt.toDate().toLocaleDateString([], { dateStyle: "medium" }); } catch (_) {}
   $("#g-name").value = profile.ingameName || ""; $("#g-uid").value = profile.gameUid || ""; $("#g-level").value = profile.gameLevel || "";
-  $("#g-status").textContent = gameDone() ? (profile.gameVerified === true ? "Game details: saved and verified" : "Game details: saved (the team verifies them before your first withdrawal)") : "Game details: incomplete. Add nickname, UID and level to join matches and withdraw.";
+  const gs = gdState();
+  $("#g-status").textContent = GD_TEXT[gs] + (gs !== "pend" && minLevel > 0 && Number(profile.gameLevel) < minLevel ? " Your level is below the minimum (" + minLevel + "), so you cannot join matches yet." : "");
+  const gm = $("#g-min"); if (gm) { gm.hidden = !(minLevel > 0); $("#g-min-n").textContent = minLevel; }
+  ["#g-pill", "#g-pill2"].forEach((q) => { const e = $(q); if (e) { e.className = "gpill " + gs; e.textContent = GD_LABEL[gs]; } });
   const u = safeUrl(profile.photoURL);
   if (u) { const i = $("#p-photo"); i.src = u; i.referrerPolicy = "no-referrer"; i.hidden = false; const a = $("#avatar"); a.src = u; a.referrerPolicy = "no-referrer"; a.hidden = false; }
 }
@@ -621,7 +642,7 @@ $("#g-save").addEventListener("click", async () => {
     await saveGameProfile(authUser.uid, n, g, Number(lv), changed && profile.gameVerified === true);   // changed details need a new verification
     profile.ingameName = n; profile.gameUid = g; profile.gameLevel = Number(lv);
     if (changed && profile.gameVerified === true) profile.gameVerified = false;
-    renderProfile(); setMsg(msg, "success", "Saved.");
+    renderProfile(); setMsg(msg, "success", changed && gdState() === "rev" ? "Saved. Approval pending." : "Saved.");
   }
   catch (e) { setMsg(msg, "error", friendlyError(e) || "Could not save. Please try again."); }
   finally { b.disabled = false; }

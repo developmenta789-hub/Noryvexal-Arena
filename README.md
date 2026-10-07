@@ -126,3 +126,14 @@ Google sign-up/login now has a password step. New page `password.html` + `js/pas
 
 
 | 2026-10-06 | Profile: Phone/Mobile field removed, **Game level** (1..100) added; coin history removed (screen, route, query, link). Profile data = single source for Join + Payvex Withdraw (`gameDone()` in `home.js` mirrors `gameDone` in `Firestor.rules`). Changing nickname/UID/level after owner verification sends `gameVerified:false`. `Firestor.rules` changed: re-publish in Console. Not run against real Firebase. |
+
+## 2026-10-07 Home sizes + messages
+- Home: My Matches tiles, Esports Games cards and section titles made smaller (`css/style.css`, "Home redesign" block). Colors unchanged.
+- Match detail: "Registration closed (match is ongoing / over)", no duplicate "Solo • Solo", prize pool 0 shows a dash instead of "Free". `node --check` only, not run in a browser.
+
+## 2026-10-07 (2) Game details = profile row + own screen
+- Profile: "Game details" row with a status pill (Pending / Approval pending / Approved), above Friends and My team. Route `#/game` (`v-game` in `home.html`) holds the form (`g-name`, `g-uid`, `g-level`, `g-save`), status card and the "Please read" notice. Logic in `js/home.js` (`gdState`, `GD_LABEL`, `GD_TEXT`, `renderProfile`).
+- Match detail: if game details are not filled the button says "Add game details to join" and opens `#/game`. Approval is not needed to join. `node --check` only.
+
+## 2026-10-07 (3) Minimum game level
+- `js/home.js`: `minLevel` from `appInfo/main.minGameLevel`; join button stops with "Minimum level to join is X" when the player's level is lower; Game details notice shows the minimum. Rules enforce it. `node --check` only.

@@ -542,32 +542,32 @@ a.sp-slide:focus-visible{outline:2px solid var(--cyan);outline-offset:-3px}
 /* ===== Home redesign (2026-10-05): navy theme, banner, 3 white My Matches tiles, 3-column Esports Games ===== */
 .homepage{--bg:#031A33;--surface:#0A2547;--surface-2:#10305A;--line:#14375F}
 .homepage .bg{background:#031A33}
-.homepage .hsec-title{justify-content:center;font-family:var(--font);font-weight:500;font-size:clamp(22px,6vw,28px);letter-spacing:0;margin:0 0 16px}
+.homepage .hsec-title{justify-content:center;font-family:var(--font);font-weight:600;font-size:clamp(16px,4.6vw,20px);letter-spacing:0;margin:0 0 10px}
 .homepage .hsec-title::before{display:none}
-.homepage .hsec{margin-top:26px}
+.homepage .hsec{margin-top:18px}
 .homepage .sp-view{border-radius:14px;border:0;aspect-ratio:2.2/1;box-shadow:none}
 .homepage .sp-slide::after{display:none}
 .homepage .sp-dots{margin-top:14px}
 .homepage .sp-dot::before{background:#0B2240}
 .homepage .sp-dot.on::before{width:8px;background:#E50914;box-shadow:none}
-.mtiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.mtile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;aspect-ratio:1/.9;border-radius:10px;background:#fff;color:#0B1220;text-decoration:none;transition:transform .15s var(--ease)}
+.mtiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mtile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;aspect-ratio:1/.62;border-radius:12px;background:#fff;color:#0B1220;text-decoration:none;transition:transform .15s var(--ease)}
 .mtile:active{transform:scale(.97)}
-.mtile b{font-size:clamp(14px,4.4vw,20px);font-weight:600;letter-spacing:.01em}
-.mt-ic{width:clamp(48px,15vw,62px);height:clamp(48px,15vw,62px);border-radius:16px;display:grid;place-items:center}
+.mtile b{font-size:clamp(12px,3.5vw,15px);font-weight:600;letter-spacing:.01em}
+.mt-ic{width:clamp(34px,10.5vw,44px);height:clamp(34px,10.5vw,44px);border-radius:16px;display:grid;place-items:center}
 .mt-ic svg{width:62%;height:62%}
 .mt-ic.ongoing{background:#1FA67A;border-radius:50%}
 .mt-ic.upcoming{background:linear-gradient(135deg,#00D08A,#0A8BEA)}
-.mt-ic.completed{background:#16B364;border-radius:10px;width:clamp(42px,13vw,54px);height:clamp(42px,13vw,54px)}
-.homepage .egrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.homepage .ecard{border-radius:10px;border:0;background:#1C2640;box-shadow:none}
+.mt-ic.completed{background:#16B364;border-radius:10px;width:clamp(30px,9.5vw,40px);height:clamp(30px,9.5vw,40px)}
+.homepage .egrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.homepage .ecard{border-radius:12px;border:0;background:#1C2640;box-shadow:none}
 @media (hover:hover){.homepage .ecard:hover{transform:none;box-shadow:none}}
-.homepage .ecard-art{aspect-ratio:1/.8}
+.homepage .ecard-art{aspect-ratio:1/.62}
 .homepage .ecard-art::after{display:none}
-.homepage .ecard-foot{height:auto;min-height:40px;padding:8px 6px;background:#1C2640;border-top:0}
-.homepage .ecard-ft{font-size:clamp(13px,3.9vw,18px);font-weight:500;text-transform:uppercase;-webkit-line-clamp:1;color:#fff}
-.homepage .ecard-ic{width:44px;height:44px}
-.homepage .ecard-badge{top:6px;left:6px;font-size:10px;padding:4px 8px}
+.homepage .ecard-foot{height:auto;min-height:30px;padding:6px 5px;background:#1C2640;border-top:0}
+.homepage .ecard-ft{font-size:clamp(11px,3.2vw,14px);font-weight:500;text-transform:uppercase;-webkit-line-clamp:1;color:#fff}
+.homepage .ecard-ic{width:34px;height:34px;padding:8px;border-radius:12px}
+.homepage .ecard-badge{top:5px;left:5px;font-size:9px;padding:3px 7px}
 
 /* ---------- bottom nav v2: floating glass pill, active tab gets a gradient capsule ---------- */
 .content{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
@@ -580,3 +580,19 @@ a.sp-slide:focus-visible{outline:2px solid var(--cyan);outline-offset:-3px}
 .bottom a.on svg{color:var(--cyan);transform:translateY(-1px) scale(1.08)}
 .bottom a:active svg{transform:scale(.92)}
 @media (prefers-reduced-motion:reduce){.bottom a,.bottom a svg,.bottom a::before{transition:none}}
+
+/* ---------- Game details (2026-10-07): profile row + status pill + own screen ---------- */
+.lrow2 .lr-t{color:var(--text);font-size:15px}
+.lrow2 .lr-r{display:flex;align-items:center;gap:10px;color:var(--dim)}
+.lr-r i{font-style:normal;font-size:20px;color:var(--dim)}
+.gpill{display:inline-block;font-style:normal;font-weight:600;font-size:12px;line-height:1;padding:6px 11px;border-radius:999px;border:1px solid;white-space:nowrap;letter-spacing:.02em}
+.gpill.pend{color:#FBBF24;background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45)}
+.gpill.rev{color:#A5B4FC;background:rgba(99,102,241,.16);border-color:rgba(129,140,248,.5)}
+.gpill.ok{color:#4ADE80;background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.5)}
+.gstate{display:flex;align-items:center;gap:14px}
+.gstate .gpill{font-size:14px;padding:8px 16px;flex:none}
+.gstate .tmeta{margin:0;flex:1}
+.gsteps{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:12px}
+.gsteps li{position:relative;padding-left:16px;font-size:13.5px;line-height:1.55;color:var(--dim)}
+.gsteps li::before{content:"";position:absolute;left:0;top:.62em;width:6px;height:6px;border-radius:50%;background:var(--blue)}
+.gsteps b{color:var(--text);font-weight:600}

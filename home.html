@@ -105,6 +105,36 @@
       <div id="friends-msg" class="msg" role="alert"></div>
     </section>
 
+    <section id="v-game" class="view" data-view="game" hidden>
+      <div class="back"><a href="#/profile" class="btn ghost sm">Back</a><h1>Game details</h1></div>
+      <div class="dbox gstate">
+        <em id="g-pill2" class="gpill pend">Pending</em>
+        <p id="g-status" class="tmeta"></p>
+      </div>
+      <div class="dbox">
+        <h3>Your Free Fire account</h3>
+        <p class="tmeta">Fill your real Free Fire nickname, UID and level. You need them to join matches and to withdraw winnings.</p>
+        <label class="flabel" for="g-name">Game nickname</label>
+        <input id="g-name" class="finput" type="text" maxlength="30" autocomplete="off" placeholder="Your Free Fire name">
+        <label class="flabel" for="g-uid">Game ID / UID (numbers only)</label>
+        <input id="g-uid" class="finput" type="text" inputmode="numeric" maxlength="15" autocomplete="off" placeholder="e.g. 123456789">
+        <label class="flabel" for="g-level">Free Fire level (1 to 100)</label>
+        <input id="g-level" class="finput" type="text" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="e.g. 45">
+        <button id="g-save" class="btn" type="button"><span>Save</span></button>
+        <div id="g-msg" class="msg" role="alert"></div>
+      </div>
+      <div class="dbox">
+        <h3>Please read</h3>
+        <ul class="gsteps">
+          <li id="g-min" hidden><b>Minimum level:</b> players must be at least level <span id="g-min-n">0</span> to join matches.</li>
+          <li><b>Playing:</b> you can join matches as soon as your details are filled. Approval is not needed to play.</li>
+          <li><b>Approval:</b> the team checks your game account when you send a withdraw request, so your account is approved at withdrawal time. This is confirmed.</li>
+          <li><b>Your level:</b> enter your real level. If the team finds that your real level is lower than what you entered, or you play beyond your level, your account can be permanently banned.</li>
+          <li><b>Changed something?</b> If you edit your nickname, UID or level after approval, it needs approval again.</li>
+        </ul>
+      </div>
+    </section>
+
     <section id="v-support" class="view" data-view="support" hidden>
       <div class="back"><a href="#/profile" class="btn ghost sm">Back</a><h1>Help and support</h1></div>
       <div id="support-body"></div>
@@ -177,20 +207,8 @@
         <p class="tmeta">Winnings (can be withdrawn): <strong id="p-win">0</strong></p>
         <p class="tmeta">Deposited coins are for playing matches. Only prize winnings can be withdrawn.</p>
       </div>
-      <div class="dbox">
-        <h3>Game details</h3>
-        <p class="tmeta">Fill your Free Fire nickname, UID and level to join matches and to withdraw winnings.</p>
-        <label class="flabel" for="g-name">Game nickname</label>
-        <input id="g-name" class="finput" type="text" maxlength="30" autocomplete="off" placeholder="Your Free Fire name">
-        <label class="flabel" for="g-uid">Game ID / UID (numbers only)</label>
-        <input id="g-uid" class="finput" type="text" inputmode="numeric" maxlength="15" autocomplete="off" placeholder="e.g. 123456789">
-        <label class="flabel" for="g-level">Free Fire level (1 to 100)</label>
-        <input id="g-level" class="finput" type="text" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="e.g. 45">
-        <p id="g-status" class="tmeta"></p>
-        <button id="g-save" class="btn" type="button"><span>Save</span></button>
-        <div id="g-msg" class="msg" role="alert"></div>
-      </div>
       <div class="dbox links">
+        <a href="#/game" class="lrow2" id="g-row"><span class="lr-t">Game details</span><span class="lr-r"><em id="g-pill" class="gpill pend">Pending</em><i aria-hidden="true">&rsaquo;</i></span></a>
         <a href="#/friends" class="lrow2">Friends<span aria-hidden="true">&rsaquo;</span></a>
         <a href="#/team" class="lrow2">My team<span aria-hidden="true">&rsaquo;</span></a>
         <a href="#/support" class="lrow2">Help and support<span aria-hidden="true">&rsaquo;</span></a>
