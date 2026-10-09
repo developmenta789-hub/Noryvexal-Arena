@@ -1,3 +1,5 @@
+> **Owner ke 3 pakke jawab (2026-10-09):** Google Sign-In/SHA-1 theek hai (debug + release dono daale hain), abhi sirf testing mode (backend baad mein), deposit mein sirf screenshot kaafi hai (UTR alag se nahi). Poori detail root `../README.md` ke sabse upar. Ye sawal dobara mat poochho.
+
 # Noryvexal Arena (User Panel: sirf Website)
 
 > ## 🛑 TESTING ONLY + NAHI BANANA HAI (2026-10-02, owner ka faisla, root README ke sabse upar wala box dekho)
