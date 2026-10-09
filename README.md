@@ -139,3 +139,12 @@ Google sign-up/login now has a password step. New page `password.html` + `js/pas
 
 ## 2026-10-07 (3) Minimum game level
 - `js/home.js`: `minLevel` from `appInfo/main.minGameLevel`; join button stops with "Minimum level to join is X" when the player's level is lower; Game details notice shows the minimum. Rules enforce it. `node --check` only.
+
+## Log 2026-10-09 (5) (Arena home: bigger My Matches + Esports Games cards, smaller fonts, sponsor banner)
+Owner ne screenshot dikha kar kaha: My Matches aur Esports Games ka height badhao, font chhota karo, sponsor banner ka corner radius kam karo aur height thodi badhao.
+- Sirf `css/style.css` ke "Home redesign" block ki values badli (HTML/JS/rules same):
+  - **Sponsor banner:** radius 14px > 8px, shape 2.2/1 > 1.9/1 (thoda unchi).
+  - **My Matches tiles:** height 1/.62 > 1/.8 (lambi), radius 12 > 10, label font max 15px > 13px, icon aur label ke beech gap 6 > 8.
+  - **Esports Games cards:** image 1/.62 > 1/.82 (lambi), radius 12 > 10, neeche ka naam font max 14px > 12px, naam wali patti ki height 30 > 38px.
+  - **Section titles** (My Matches / Esports Games): font max 20px > 17px.
+- Phone par dekha nahi (sirf CSS badla). Website par aane ke liye `Noryvexal Arena` folder GitHub par push karna padega.
