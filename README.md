@@ -148,3 +148,17 @@ Owner ne screenshot dikha kar kaha: My Matches aur Esports Games ka height badha
   - **Esports Games cards:** image 1/.62 > 1/.82 (lambi), radius 12 > 10, neeche ka naam font max 14px > 12px, naam wali patti ki height 30 > 38px.
   - **Section titles** (My Matches / Esports Games): font max 20px > 17px.
 - Phone par dekha nahi (sirf CSS badla). Website par aane ke liye `Noryvexal Arena` folder GitHub par push karna padega.
+
+## Log 2026-10-10 (Arena home: smaller sponsor banner, My Matches gaps, new bottom nav)
+- Sirf `css/style.css` (neeche naya block) + `home.html` nav icons. JS, rules, data nahi badle. `Firestor.rules` nahi badli.
+- Sponsor banner: shape 1.9/1 > 2.5/1 (kam unchi), max-height 240px.
+- My Matches tiles: gap 8 > 16px, side padding 12px, tiles patle, radius 14px.
+- Bottom nav: naya floating pill; active tab ka icon gradient capsule mein. Icons ab alag: Home = ghar, My Matches = gamepad, Leaderboard = podium + star, Profile = user. Pehle trophy topbar logo jaisa aur tick Completed tile jaisa tha (duplicate).
+- Cache-bust `?v=20261010a` (CSS/JS). Next change par ye `v` badlo.
+- Not run in a browser (only structure check).
+
+## Log 2026-10-10 (2) (Banned / Suspended screen, new design)
+- `users` ke naye optional fields: `statusReason` (text max 200, Admin likhta hai) aur `suspendedUntil` (timestamp, sirf suspended mein). `status` = active / suspended (TEMPORARY) / banned (PERMANENT).
+- Arena `home.html` + `js/home.js` (`blockState`, `showBlocked`) + `css/style.css`: naya full-screen design. Banned = laal icon, "Permanent" pill, reason card, Log out. Suspended = amber clock icon, "Temporary" pill, live countdown (Days/Hours/Min/Sec), "Ends on <date>", reason, aur time khatam hote hi page apne aap reload hokar normal khul jata hai. Purane suspended users jinka `suspendedUntil` nahi hai wo "until the team lifts it" dikhate hain.
+- Cache-bust `?v=20261010b`.
+- Not run in a browser (`node --check` only).

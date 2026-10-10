@@ -654,6 +654,56 @@ $("#share-app").addEventListener("click", async (e) => { // old app Profile > Sh
 });
 $("#logout").addEventListener("click", async () => { await logout(); location.replace("login.html"); });
 
+
+/* ---------- banned (permanent) / suspended (temporary) screen ---------- */
+function blockState(p) {
+  const st = p && p.status;
+  if (st === "banned") return { state: "banned", until: 0, reason: String(p.statusReason || "") };
+  if (st === "suspended") {
+    let until = 0;
+    try { const t = p.suspendedUntil; until = t && t.toMillis ? t.toMillis() : 0; } catch (_) {}
+    if (until && until <= Date.now()) return null; // suspension is over
+    return { state: "suspended", until, reason: String(p.statusReason || "") };
+  }
+  return null;
+}
+const BK_ICON = {
+  banned: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"><circle cx="32" cy="32" r="24"/><path d="M15 15l34 34"/></svg>',
+  suspended: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="32" r="24"/><path d="M32 18v15l9 6"/></svg>'
+};
+function showBlocked(b) {
+  const box = $("#blocked"); box.dataset.state = b.state;
+  const perm = b.state === "banned";
+  $("#bk-ic").innerHTML = BK_ICON[b.state]; // static trusted SVG
+  $("#bk-pill").textContent = perm ? "Permanent" : "Temporary";
+  $("#blocked-title").textContent = perm ? "Account banned" : "Account suspended";
+  $("#blocked-text").textContent = perm
+    ? "Your account was banned for breaking the rules. This decision is permanent."
+    : "Your account is suspended for now. You can use it again when the timer below ends.";
+  if (b.reason) { $("#bk-reason-text").textContent = b.reason; $("#bk-reason").hidden = false; }
+  const list = $("#bk-list"); list.textContent = "";
+  (perm ? ["You cannot join any match", "Wallet, deposit and withdraw are blocked in Payvex", "This ban cannot be removed from the app"]
+        : ["You cannot join matches until the timer ends", "Wallet, deposit and withdraw are blocked in Payvex", "Your coins are safe"])
+    .forEach(t => { const li = document.createElement("li"); li.textContent = t; list.append(li); });
+  if (!perm && b.until) {
+    $("#bk-count").hidden = false;
+    $("#bk-until").hidden = false;
+    $("#bk-until").textContent = "Ends on " + new Date(b.until).toLocaleString([], { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    const tick = () => {
+      const left = Math.max(0, b.until - Date.now());
+      if (left <= 0) { location.reload(); return; }
+      const s = Math.floor(left / 1000);
+      $("#bk-d").textContent = String(Math.floor(s / 86400));
+      $("#bk-h").textContent = String(Math.floor(s % 86400 / 3600)).padStart(2, "0");
+      $("#bk-m").textContent = String(Math.floor(s % 3600 / 60)).padStart(2, "0");
+      $("#bk-s").textContent = String(s % 60).padStart(2, "0");
+    };
+    tick(); setInterval(tick, 1000);
+  } else if (!perm) { $("#bk-until").hidden = false; $("#bk-until").textContent = "Suspended until the team lifts it."; }
+  box.hidden = false;
+  $("#blocked-out").addEventListener("click", async () => { await logout(); location.replace("login.html"); });
+}
+
 /* ---------- start ---------- */
 (async () => {
   const u = await firstAuthState();
@@ -662,13 +712,8 @@ $("#logout").addEventListener("click", async () => { await logout(); location.re
   try { profile = await getProfile(u.uid); } catch (_) {}
   if (!isAllowed(profile)) { await logout(); return location.replace("login.html"); }
   if (gateFor(u) !== "ok") return location.replace("password.html"); // set / confirm password first
-  if (profile.status === "banned" || profile.status === "suspended") { // old app Banned / Suspended screens
-    const b = $("#blocked"); b.dataset.state = profile.status;
-    $("#blocked-title").textContent = profile.status === "banned" ? "Account banned" : "Account suspended";
-    $("#blocked-text").textContent = profile.status === "banned" ? "Your account was banned for breaking the rules. You cannot join matches." : "Your account is suspended for now. Contact support or try again later.";
-    b.hidden = false; $("#blocked-out").addEventListener("click", async () => { await logout(); location.replace("login.html"); });
-    return;
-  }
+  const blk = blockState(profile);
+  if (blk) { showBlocked(blk); return; }
   if (useServer()) { try { await ensureSession(); } catch (_) {} } // purane Firebase users ka server account bhi ban jaye
   renderProfile(); renderCats(); renderMyHome(); route();
   $("#app").hidden = false;

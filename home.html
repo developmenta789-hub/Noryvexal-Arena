@@ -1,8 +1,21 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#031A33"><meta name="color-scheme" content="dark"><link rel="icon" href="assets/favicon.png"><link rel="preload" href="assets/fonts/Poppins-Regular.ttf" as="font" type="font/ttf" crossorigin><link rel="preload" href="assets/fonts/Poppins-Medium.ttf" as="font" type="font/ttf" crossorigin><link rel="preload" href="assets/fonts/Poppins-Bold.ttf" as="font" type="font/ttf" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap"><link rel="stylesheet" href="css/style.css?v=20261009b"><title>Home | Noryvexal Arena</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#031A33"><meta name="color-scheme" content="dark"><link rel="icon" href="assets/favicon.png"><link rel="preload" href="assets/fonts/Poppins-Regular.ttf" as="font" type="font/ttf" crossorigin><link rel="preload" href="assets/fonts/Poppins-Medium.ttf" as="font" type="font/ttf" crossorigin><link rel="preload" href="assets/fonts/Poppins-Bold.ttf" as="font" type="font/ttf" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap"><link rel="stylesheet" href="css/style.css?v=20261010b"><title>Home | Noryvexal Arena</title>
 </head>
 <body class="homepage"><div class="bg" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i><i class="grid"></i></div>
 <section id="blocked" class="blocked" hidden>
-  <div class="dbox doc"><h2 id="blocked-title">Account blocked</h2><p id="blocked-text"></p><button id="blocked-out" class="btn" type="button">Log out</button></div>
+  <div class="bk-card">
+    <div class="bk-ic" id="bk-ic" aria-hidden="true"></div>
+    <span class="bk-pill" id="bk-pill">Blocked</span>
+    <h2 id="blocked-title">Account blocked</h2>
+    <p id="blocked-text" class="bk-text"></p>
+    <div class="bk-count" id="bk-count" hidden>
+      <div><b id="bk-d">0</b><small>Days</small></div><div><b id="bk-h">00</b><small>Hours</small></div><div><b id="bk-m">00</b><small>Min</small></div><div><b id="bk-s">00</b><small>Sec</small></div>
+    </div>
+    <p class="bk-until" id="bk-until" hidden></p>
+    <div class="bk-reason" id="bk-reason" hidden><small>Reason from the team</small><b id="bk-reason-text"></b></div>
+    <ul class="bk-list" id="bk-list"></ul>
+    <button id="blocked-out" class="btn" type="button">Log out</button>
+    <p class="bk-pow">Powered by NST</p>
+  </div>
 </section>
 <div id="app" class="shell" hidden>
   <header class="topbar">
@@ -223,11 +236,11 @@
 
   </main>
   <nav class="bottom" aria-label="Main">
-    <a href="#/" data-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span>Home</span></a>
-    <a href="#/my" data-nav="my"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg><span>My Matches</span></a>
-    <a href="#/board" data-nav="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 01-10 0zM7 6H4v1a3 3 0 003 3M17 6h3v1a3 3 0 01-3 3M12 14v4M8 21h8"/></svg><span>Leaderboard</span></a>
-    <a href="#/profile" data-nav="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><span>Profile</span></a>
+    <a href="#/" data-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="d" d="M4 10.5L12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-5.5H9v5.5H5.5A1.5 1.5 0 0 1 4 19z"/><path d="M2.8 11.2L12 3.5l9.2 7.7"/></svg><span>Home</span></a>
+    <a href="#/my" data-nav="my"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="d" d="M7 7h10a5 5 0 0 1 4.9 4l.8 4.2a2.5 2.5 0 0 1-4.3 2.1L16 15H8l-2.4 2.3a2.5 2.5 0 0 1-4.3-2.1l.8-4.2A5 5 0 0 1 7 7z"/><path d="M7.5 10v3.4M5.8 11.7h3.4"/><circle cx="15.8" cy="10.6" r=".9" fill="currentColor"/><circle cx="18" cy="12.8" r=".9" fill="currentColor"/></svg><span>My Matches</span></a>
+    <a href="#/board" data-nav="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.3l1.1 2.2 2.4.35-1.75 1.7.4 2.4L12 7.8 9.85 8.95l.4-2.4L8.5 4.85l2.4-.35z"/><rect class="d" x="3" y="14" width="5.2" height="7" rx="1.2"/><rect class="d" x="9.4" y="11" width="5.2" height="10" rx="1.2"/><rect class="d" x="15.8" y="16.5" width="5.2" height="4.5" rx="1.2"/></svg><span>Leaderboard</span></a>
+    <a href="#/profile" data-nav="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="d" cx="12" cy="8" r="4"/><path class="d" d="M4.5 20.5c.8-3.9 3.9-6 7.5-6s6.7 2.1 7.5 6z"/></svg><span>Profile</span></a>
   </nav>
 </div>
 <noscript><p class="banner">Please enable JavaScript to use Noryvexal Arena.</p></noscript>
-<script type="module" src="js/home.js?v=20261009b"></script></body></html>
+<script type="module" src="js/home.js?v=20261010b"></script></body></html>
